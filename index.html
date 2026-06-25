@@ -105,8 +105,10 @@
             .btn {
                 display: inline-flex;
                 align-items: center;
+                justify-content: center;
                 gap: 10px;
-                padding: 14px 32px;
+                padding: 10px 24px;
+                min-height: 44px;
                 border-radius: 50px;
                 font-family: "Poppins", sans-serif;
                 font-weight: 500;
@@ -121,20 +123,22 @@
                 color: #fff;
                 box-shadow: 0 4px 20px rgba(184, 156, 125, 0.35);
             }
-            .btn-primary:hover {
-                background: var(--primary-dark);
-                transform: translateY(-3px);
-                box-shadow: 0 8px 30px rgba(184, 156, 125, 0.45);
-            }
             .btn-secondary {
                 background: transparent;
                 color: #ccc;
                 border: 2px solid var(--primary);
             }
-            .btn-secondary:hover {
-                background: var(--primary);
-                color: #fff;
-                transform: translateY(-3px);
+            @media (hover: hover) {
+                .btn-primary:hover {
+                    background: var(--primary-dark);
+                    transform: translateY(-3px);
+                    box-shadow: 0 8px 30px rgba(184, 156, 125, 0.45);
+                }
+                .btn-secondary:hover {
+                    background: var(--primary);
+                    color: #fff;
+                    transform: translateY(-3px);
+                }
             }
             #loader {
                 position: fixed;
@@ -331,24 +335,30 @@
             .nav-actions {
                 display: flex;
                 align-items: center;
-                gap: 18px;
+                gap: 6px;
             }
             .nav-actions i {
                 font-size: 18px;
                 color: #fff;
                 cursor: pointer;
                 transition: var(--transition);
+                width: 42px;
+                height: 42px;
+                display: inline-flex;
+                align-items: center;
+                justify-content: center;
+                border-radius: 50%;
             }
             .nav-admin-icon {
-                font-size: 15px !important;
-                opacity: 0.5;
+                font-size: 16px !important;
+                opacity: 0.6;
             }
             .nav-admin-icon:hover {
                 opacity: 1 !important;
             }
             .nav-actions i:hover {
+                background: rgba(255, 255, 255, 0.15);
                 color: var(--primary-light);
-                transform: scale(1.1);
             }
             .navbar.scrolled .nav-links a {
                 color: var(--text);
@@ -360,6 +370,7 @@
                 color: var(--text);
             }
             .navbar.scrolled .nav-actions i:hover {
+                background: rgba(0, 0, 0, 0.05);
                 color: var(--primary);
             }
             .navbar.scrolled .nav-links a::after {
@@ -384,19 +395,33 @@
             .nav-toggle {
                 display: none;
                 flex-direction: column;
+                justify-content: center;
+                align-items: center;
                 gap: 5px;
                 cursor: pointer;
                 background: none;
                 border: none;
-                padding: 4px;
+                width: 44px;
+                height: 44px;
+                border-radius: 50%;
+                transition: var(--transition);
+            }
+            .nav-toggle:hover {
+                background: rgba(255, 255, 255, 0.15);
+            }
+            .navbar.scrolled .nav-toggle:hover {
+                background: rgba(0, 0, 0, 0.05);
             }
             .nav-toggle span {
                 display: block;
                 width: 24px;
                 height: 2px;
-                background: var(--accent);
+                background: #fff;
                 transition: var(--transition);
                 border-radius: 2px;
+            }
+            .navbar.scrolled .nav-toggle span {
+                background: var(--text);
             }
             .nav-toggle.active span:nth-child(1) {
                 transform: rotate(45deg) translate(5px, 5px);
@@ -1399,7 +1424,8 @@
                 }
                 .modal-content {
                     grid-template-columns: 1fr;
-                    max-width: 450px;
+                    max-width: 100%;
+                    width: 100%;
                 }
                 .modal-image {
                     aspect-ratio: 1/1;
@@ -1415,13 +1441,29 @@
                 .nav-toggle {
                     display: flex;
                 }
-                .nav-actions
-                    i:not(.fa-search):not(.fa-shopping-bag):not(.fa-heart):not(.fa-user-shield) {
-                    display: none;
+                .nav-logo {
+                    font-size: 22px;
+                    padding: 4px 14px;
+                }
+                .nav-logo .logo-img {
+                    height: 28px;
+                    margin-right: 6px;
+                }
+                .nav-actions {
+                    gap: 4px;
+                }
+                .nav-actions i {
+                    width: 38px;
+                    height: 38px;
+                    font-size: 16px;
                 }
                 .hero {
                     min-height: auto;
                     padding: 140px 0 80px;
+                }
+                .hero-content {
+                    padding: 30px 24px;
+                    border-radius: 16px;
                 }
                 .hero h1 {
                     font-size: 36px;
@@ -1432,21 +1474,21 @@
                 }
                 .hero-buttons .btn {
                     width: 100%;
-                    max-width: 260px;
+                    max-width: 280px;
                     justify-content: center;
                 }
                 .categories-grid {
                     grid-template-columns: repeat(2, 1fr);
                 }
                 .products-grid {
-                    grid-template-columns: repeat(2, 1fr);
-                    gap: 16px;
+                    grid-template-columns: repeat(auto-fit, minmax(145px, 1fr));
+                    gap: 12px;
                 }
                 .features-grid {
                     grid-template-columns: 1fr;
                 }
                 .review-card {
-                    min-width: calc(100% - 0px);
+                    min-width: 100%;
                 }
                 .gallery-grid {
                     grid-template-columns: repeat(2, 1fr);
@@ -1464,8 +1506,49 @@
                     grid-column: span 1;
                     grid-row: span 1;
                 }
+                /* Responsive Process Timeline (Vertical Flow) */
                 .process-timeline {
-                    grid-template-columns: 1fr 1fr;
+                    display: flex;
+                    flex-direction: column;
+                    gap: 30px;
+                    align-items: flex-start;
+                    padding-left: 20px;
+                    position: relative;
+                }
+                .process-timeline::before {
+                    display: block;
+                    width: 2px;
+                    height: calc(100% - 60px);
+                    top: 40px;
+                    left: 60px;
+                    right: auto;
+                    background: linear-gradient(
+                        to bottom,
+                        var(--primary-light),
+                        var(--primary),
+                        var(--primary-light)
+                    );
+                    z-index: 1;
+                }
+                .step-card {
+                    display: flex;
+                    align-items: center;
+                    text-align: left;
+                    gap: 20px;
+                    padding: 0;
+                    width: 100%;
+                }
+                .step-number {
+                    margin: 0;
+                    flex-shrink: 0;
+                }
+                .step-card i {
+                    margin-bottom: 0;
+                    font-size: 20px;
+                }
+                .step-card h4 {
+                    font-size: 16px;
+                    line-height: 1.3;
                 }
                 .newsletter-form {
                     flex-direction: column;
@@ -1485,19 +1568,52 @@
                 section {
                     padding: 60px 0;
                 }
+                /* Responsive Admin Form & Overlays */
+                .admin-box {
+                    padding: 24px 16px;
+                    border-radius: 16px;
+                    max-height: 95vh;
+                }
+                .admin-form {
+                    grid-template-columns: 1fr;
+                    padding: 16px;
+                    gap: 12px;
+                }
+                .admin-toolbar {
+                    flex-direction: column;
+                    align-items: stretch;
+                    gap: 12px;
+                }
+                .admin-toolbar > div {
+                    flex-direction: column;
+                    gap: 8px;
+                }
+                .admin-toolbar button {
+                    width: 100%;
+                }
             }
             @media (max-width: 480px) {
                 .categories-grid {
                     grid-template-columns: 1fr;
                 }
-                .products-grid {
-                    grid-template-columns: 1fr;
-                }
-                .process-timeline {
-                    grid-template-columns: 1fr;
-                }
                 .container {
                     padding: 0 16px;
+                }
+                .nav-logo {
+                    font-size: 16px;
+                    padding: 4px 10px;
+                }
+                .nav-logo .logo-img {
+                    height: 22px;
+                    margin-right: 4px;
+                }
+                .nav-actions {
+                    gap: 2px;
+                }
+                .nav-actions i {
+                    width: 36px;
+                    height: 36px;
+                    font-size: 15px;
                 }
                 .hero h1 {
                     font-size: 30px;
@@ -1512,6 +1628,56 @@
                     bottom: 16px;
                     right: 16px;
                 }
+                .modal-overlay {
+                    padding: 12px;
+                }
+                .modal-content {
+                    border-radius: 12px;
+                }
+                .modal-body {
+                    padding: 20px 16px;
+                }
+                .admin-overlay {
+                    padding: 12px;
+                }
+            }
+            /* Prevent sticky hover effects on touch screens */
+            @media (hover: hover) {
+                .category-card:hover {
+                    transform: translateY(-8px);
+                    box-shadow: var(--shadow-lg);
+                }
+                .category-card:hover img {
+                    transform: scale(1.08);
+                }
+                .product-card:hover {
+                    transform: translateY(-6px);
+                    box-shadow: var(--shadow-lg);
+                }
+                .product-card:hover .product-image img {
+                    transform: scale(1.06);
+                }
+                .feature-card:hover {
+                    transform: translateY(-8px);
+                    box-shadow: var(--shadow-lg);
+                    border-color: var(--primary-light);
+                    background: #fff;
+                }
+                .review-card:hover {
+                    transform: translateY(-6px);
+                    box-shadow: 0 12px 40px rgba(0, 0, 0, 0.1);
+                }
+                .gallery-item:hover img {
+                    transform: scale(1.08);
+                }
+                .gallery-item:hover .gallery-item-overlay {
+                    opacity: 1;
+                }
+            }
+            /* Accessibility outlines for tab index navigation */
+            *:focus-visible {
+                outline: 3px solid var(--primary);
+                outline-offset: 2px;
             }
         /* Admin Panel */
         .admin-overlay {
@@ -2580,9 +2746,35 @@
                 <h2><i class="fas fa-shield-alt" style="color:var(--primary)"></i> Admin Dashboard</h2>
                 <p class="admin-sub">Manage your product catalog. Changes are saved automatically.</p>
 
-                <div class="admin-toolbar">
+                <div class="admin-toolbar" style="display:flex;justify-content:space-between;align-items:center;flex-wrap:wrap;gap:12px;">
                     <span><strong id="adminProductCount">0</strong> products</span>
-                    <button class="btn btn-primary" onclick="showAddForm()"><i class="fas fa-plus"></i> Add Product</button>
+                    <div style="display:flex;gap:8px;">
+                        <button class="btn btn-secondary" style="color:#000;border-color:var(--primary);padding:9px 16px;font-size:13px;" onclick="toggleBin()"><i class="fas fa-trash-alt"></i> Recycle Bin (<span id="adminBinCount">0</span>)</button>
+                        <button class="btn btn-primary" onclick="showAddForm()"><i class="fas fa-plus"></i> Add Product</button>
+                    </div>
+                </div>
+
+                <!-- Recycle Bin View -->
+                <div class="admin-bin-section" id="adminBinSection" style="display:none;margin-top:20px;border:1px dashed var(--primary);border-radius:12px;padding:16px;background:var(--secondary);">
+                    <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:12px;border-bottom:1px solid var(--primary-light);padding-bottom:8px;">
+                        <span style="font-weight:600;color:var(--accent);font-size:16px;"><i class="fas fa-trash-alt"></i> Recycle Bin (Items auto-delete after 48h)</span>
+                        <button style="background:none;border:none;cursor:pointer;font-size:20px;color:var(--text-light);line-height:1;" onclick="toggleBin()">&times;</button>
+                    </div>
+                    <div class="admin-table-wrap" style="background:#fff;border-radius:8px;">
+                        <table class="admin-table">
+                            <thead>
+                                <tr>
+                                    <th>Image</th>
+                                    <th>Name</th>
+                                    <th>Deleted At</th>
+                                    <th>Expires In</th>
+                                    <th>Actions</th>
+                                </tr>
+                            </thead>
+                            <tbody id="adminBinTableBody"></tbody>
+                        </table>
+                    </div>
+                    <div class="admin-empty" id="adminBinEmptyState" style="text-align:center;padding:20px;color:var(--text-light);font-style:italic;">Recycle bin is empty.</div>
                 </div>
 
                 <div class="admin-form" id="adminProductForm" style="display:none">
@@ -2898,16 +3090,21 @@
                 }
             }
 
+            let showingBin = false;
+
             function showAdminDashboard() {
                 document.getElementById('adminDashboardOverlay').classList.add('active');
                 document.body.style.overflow = 'hidden';
                 renderAdminTable();
+                updateBinCount();
             }
 
             function logoutAdmin() {
                 closeAdmin('adminDashboardOverlay');
                 editingProductId = null;
                 hideForm();
+                showingBin = false;
+                document.getElementById('adminBinSection').style.display = 'none';
             }
 
             function renderAdminTable() {
@@ -2947,6 +3144,8 @@
                 document.getElementById('af_category').value = 'Abayas';
                 document.getElementById('af_description').value = '';
                 document.getElementById('adminProductForm').style.display = 'grid';
+                showingBin = false;
+                document.getElementById('adminBinSection').style.display = 'none';
             }
 
             function editProduct(id) {
@@ -2962,6 +3161,8 @@
                 document.getElementById('af_category').value = p.category;
                 document.getElementById('af_description').value = p.description;
                 document.getElementById('adminProductForm').style.display = 'grid';
+                showingBin = false;
+                document.getElementById('adminBinSection').style.display = 'none';
             }
 
             function uploadImage(input) {
@@ -3005,13 +3206,140 @@
                 showToast('adminSave');
             }
 
+            // Recycle Bin Helpers
+            function getBinProducts() {
+                try {
+                    const stored = localStorage.getItem('hm_bin_products');
+                    if (stored) {
+                        const parsed = JSON.parse(stored);
+                        if (Array.isArray(parsed)) {
+                            const now = Date.now();
+                            // Filter items deleted within last 48 hours
+                            const validBin = parsed.filter(function(p) {
+                                return (now - p.deletedAt) < 172800000;
+                            });
+                            if (validBin.length !== parsed.length) {
+                                saveBinProducts(validBin);
+                            }
+                            return validBin;
+                        }
+                    }
+                } catch (e) {}
+                return [];
+            }
+
+            function saveBinProducts(bin) {
+                localStorage.setItem('hm_bin_products', JSON.stringify(bin));
+            }
+
+            function updateBinCount() {
+                const bin = getBinProducts();
+                const countEl = document.getElementById('adminBinCount');
+                if (countEl) countEl.textContent = bin.length;
+            }
+
+            function toggleBin() {
+                showingBin = !showingBin;
+                const binSection = document.getElementById('adminBinSection');
+                if (showingBin) {
+                    binSection.style.display = 'block';
+                    renderBinTable();
+                    hideForm();
+                } else {
+                    binSection.style.display = 'none';
+                }
+            }
+
+            function renderBinTable() {
+                var bin = getBinProducts();
+                var tbody = document.getElementById('adminBinTableBody');
+                var empty = document.getElementById('adminBinEmptyState');
+                tbody.innerHTML = '';
+                if (bin.length === 0) {
+                    empty.style.display = 'block';
+                    return;
+                }
+                empty.style.display = 'none';
+                
+                var now = Date.now();
+                bin.forEach(function(p) {
+                    var tr = document.createElement('tr');
+                    
+                    var deletedDate = new Date(p.deletedAt);
+                    var dateStr = deletedDate.toLocaleDateString() + ' ' + deletedDate.toLocaleTimeString([], {hour: '2-digit', minute:'2-digit'});
+                    
+                    var msLeft = 172800000 - (now - p.deletedAt);
+                    var hoursLeft = Math.max(0, Math.floor(msLeft / (1000 * 60 * 60)));
+                    var minsLeft = Math.max(0, Math.floor((msLeft % (1000 * 60 * 60)) / (1000 * 60)));
+                    var timeStr = hoursLeft + 'h ' + minsLeft + 'm';
+
+                    tr.innerHTML =
+                        '<td><img class="admin-thumb" src="' + p.image + '" onerror="this.src=\'https://picsum.photos/seed/' + p.id + '/48/60\'" alt="' + p.name + '" /></td>' +
+                        '<td><strong>' + p.name + '</strong></td>' +
+                        '<td>' + dateStr + '</td>' +
+                        '<td><span class="admin-badge" style="background:#f39c12;color:#fff;">' + timeStr + '</span></td>' +
+                        '<td><div class="admin-actions">' +
+                            '<button class="btn-edit" onclick="restoreProduct(\'' + p.id + '\')" title="Restore" style="background:#2ecc71;color:#fff;"><i class="fas fa-undo"></i></button>' +
+                            '<button class="btn-delete" onclick="permanentlyDeleteProduct(\'' + p.id + '\')" title="Delete Permanently"><i class="fas fa-trash-alt"></i></button>' +
+                        '</div></td>';
+                    tbody.appendChild(tr);
+                });
+            }
+
             function deleteProduct(id) {
-                if (!confirm('Are you sure you want to delete this product?')) return;
+                if (!confirm('Are you sure you want to delete this product? It will be moved to the Recycle Bin for 48 hours.')) return;
                 var products = getProducts();
-                products = products.filter(function(p) { return p.id !== id; });
+                var p = products.find(function(x) { return x.id === id; });
+                if (!p) return;
+                
+                var bin = getBinProducts();
+                p.deletedAt = Date.now();
+                bin.push(p);
+                saveBinProducts(bin);
+
+                products = products.filter(function(x) { return x.id !== id; });
                 saveProducts(products);
+
                 renderAdminTable();
                 renderProducts();
+                updateBinCount();
+                if (showingBin) {
+                    renderBinTable();
+                }
+                showToast('adminDelete');
+            }
+
+            function restoreProduct(id) {
+                var bin = getBinProducts();
+                var p = bin.find(function(x) { return x.id === id; });
+                if (!p) return;
+                
+                var products = getProducts();
+                delete p.deletedAt;
+                products.push(p);
+                saveProducts(products);
+
+                bin = bin.filter(function(x) { return x.id !== id; });
+                saveBinProducts(bin);
+
+                renderAdminTable();
+                renderProducts();
+                updateBinCount();
+                if (showingBin) {
+                    renderBinTable();
+                }
+                showToast('adminRestore');
+            }
+
+            function permanentlyDeleteProduct(id) {
+                if (!confirm('Are you sure you want to permanently delete this product? This action cannot be undone.')) return;
+                var bin = getBinProducts();
+                bin = bin.filter(function(x) { return x.id !== id; });
+                saveBinProducts(bin);
+                updateBinCount();
+                if (showingBin) {
+                    renderBinTable();
+                }
                 showToast('adminDelete');
             }
 
@@ -3055,6 +3383,10 @@
                     case "adminDelete":
                         msg = "Product deleted!";
                         icon = "fa-trash";
+                        break;
+                    case "adminRestore":
+                        msg = "Product restored successfully!";
+                        icon = "fa-undo";
                         break;
                     case "adminError":
                         msg = "Please fill all fields!";
