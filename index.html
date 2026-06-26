@@ -305,32 +305,61 @@
             .nav-links {
                 display: flex;
                 align-items: center;
-                gap: 32px;
+                gap: 6px;
                 list-style: none;
+                background: rgba(255, 255, 255, 0.95);
+                border-radius: 50px;
+                padding: 6px 8px;
+                box-shadow: 0 10px 30px rgba(0, 0, 0, 0.08);
+                border: 1px solid rgba(255, 255, 255, 0.4);
+                backdrop-filter: blur(10px);
+                -webkit-backdrop-filter: blur(10px);
+                transition: var(--transition);
             }
             .nav-links a {
                 font-size: 14px;
-                font-weight: 400;
-                color: #fff;
+                font-weight: 500;
+                color: #1a1a1a;
                 letter-spacing: 0.3px;
                 transition: var(--transition);
                 position: relative;
-            }
-            .nav-links a::after {
-                content: "";
-                position: absolute;
-                bottom: -4px;
-                left: 0;
-                width: 0;
-                height: 1.5px;
-                background: var(--primary-light);
-                transition: var(--transition);
-            }
-            .nav-links a:hover::after {
-                width: 100%;
+                padding: 8px 18px;
+                border-radius: 50px;
+                display: inline-flex;
+                align-items: center;
+                gap: 8px;
+                min-height: 38px;
             }
             .nav-links a:hover {
-                color: var(--primary-light);
+                background: rgba(0, 0, 0, 0.04);
+            }
+            .nav-links a.active {
+                background: #bbf2a2 !important;
+                color: #000000 !important;
+                font-weight: 600;
+            }
+            .nav-links a .nav-badge {
+                display: inline-flex;
+                align-items: center;
+                justify-content: center;
+                background: #000000;
+                color: #ffffff;
+                font-size: 10px;
+                font-weight: 700;
+                width: 20px;
+                height: 20px;
+                border-radius: 50%;
+                line-height: 1;
+                margin-left: 2px;
+                animation: badgePop 0.3s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+            }
+            @keyframes badgePop {
+                0% {
+                    transform: scale(0);
+                }
+                100% {
+                    transform: scale(1);
+                }
             }
             .nav-actions {
                 display: flex;
@@ -360,21 +389,12 @@
                 background: rgba(255, 255, 255, 0.15);
                 color: var(--primary-light);
             }
-            .navbar.scrolled .nav-links a {
-                color: var(--text);
-            }
-            .navbar.scrolled .nav-links a:hover {
-                color: var(--primary);
-            }
             .navbar.scrolled .nav-actions i {
                 color: var(--text);
             }
             .navbar.scrolled .nav-actions i:hover {
                 background: rgba(0, 0, 0, 0.05);
                 color: var(--primary);
-            }
-            .navbar.scrolled .nav-links a::after {
-                background: var(--primary);
             }
             .navbar.scrolled .nav-logo .logo-haya {
                 color: var(--accent);
@@ -1457,6 +1477,10 @@
                     height: 38px;
                     font-size: 16px;
                 }
+                .nav-wishlist-icon,
+                .nav-admin-icon {
+                    display: none !important;
+                }
                 .hero {
                     min-height: auto;
                     padding: 140px 0 80px;
@@ -1614,6 +1638,26 @@
                     width: 36px;
                     height: 36px;
                     font-size: 15px;
+                }
+            }
+            @media (max-width: 360px) {
+                .nav-logo {
+                    font-size: 14px !important;
+                    padding: 4px 8px !important;
+                }
+                .nav-logo .logo-img {
+                    height: 18px !important;
+                }
+                .nav-actions {
+                    gap: 1px !important;
+                }
+                .nav-actions i {
+                    width: 32px !important;
+                    height: 32px !important;
+                    font-size: 13px !important;
+                }
+                .container {
+                    padding: 0 10px;
                 }
                 .hero h1 {
                     font-size: 30px;
@@ -1936,24 +1980,18 @@
                     ><span class="logo-modesty">Modesty</span></a
                 >
                 <ul class="nav-links">
-                    <li><a href="#categories">Categories</a></li>
-                    <li><a href="#products">New Arrivals</a></li>
-                    <li><a href="#reviews">Reviews</a></li>
-                    <li><a href="#instagram">Gallery</a></li>
-                    <li><a href="#contact">Contact</a></li>
+                    <li><a href="#hero" data-count="✦">Home</a></li>
+                    <li><a href="#categories" data-count="6">Categories</a></li>
+                    <li><a href="#products" data-count="8">New Arrivals</a></li>
+                    <li><a href="#reviews" data-count="5">Reviews</a></li>
+                    <li><a href="#instagram" data-count="6">Gallery</a></li>
+                    <li><a href="#contact" data-count="✓">Contact</a></li>
                 </ul>
                 <div class="nav-actions">
                     <i class="fas fa-search" onclick="toggleSearch()"></i>
-                    <i class="far fa-heart" onclick="showToast('wishlist')"></i>
-                    <i
-                        class="fas fa-shopping-bag"
-                        onclick="showToast('cart')"
-                    ></i>
-                    <i
-                        class="fas fa-user-shield nav-admin-icon"
-                        onclick="showAdminLogin()"
-                        title="Admin"
-                    ></i>
+                    <i class="far fa-heart nav-wishlist-icon" onclick="showToast('wishlist')" title="Wishlist"></i>
+                    <i class="fas fa-shopping-bag nav-cart-icon" onclick="showToast('cart')" title="Cart"></i>
+                    <i class="fas fa-user-shield nav-admin-icon" onclick="showAdminLogin()" title="Admin"></i>
                     <button
                         class="nav-toggle"
                         id="navToggle"
@@ -1969,6 +2007,7 @@
 
         <div class="mobile-nav-overlay" id="mobileOverlay"></div>
         <div class="mobile-nav" id="mobileNav">
+            <a href="#hero" class="mobile-link">Home</a>
             <a href="#categories" class="mobile-link">Categories</a>
             <a href="#products" class="mobile-link">New Arrivals</a>
             <a href="#reviews" class="mobile-link">Reviews</a>
@@ -1991,6 +2030,16 @@
                     return false;
                 "
                 ><i class="fas fa-shopping-bag"></i> Cart</a
+            >
+            <a
+                href="#"
+                class="mobile-link"
+                onclick="
+                    showAdminLogin();
+                    closeMobile();
+                    return false;
+                "
+                ><i class="fas fa-user-shield"></i> Admin Panel</a
             >
         </div>
 
@@ -2847,10 +2896,64 @@
 
             const navbar = document.getElementById("navbar");
             const backTop = document.getElementById("backTop");
+
+            // ===== SCROLLSPY & DYNAMIC BADGE INJECTION =====
+            const navLinks = document.querySelectorAll(".nav-links a");
+            const sections = [
+                document.getElementById("hero"),
+                document.getElementById("categories"),
+                document.getElementById("products"),
+                document.getElementById("reviews"),
+                document.getElementById("instagram"),
+                document.getElementById("contact")
+            ];
+
+            function updateScrollSpy() {
+                let currentActiveSection = sections[0];
+                const scrollPos = window.scrollY + 180; // offset for floating navbar spacing
+
+                sections.forEach((section) => {
+                    if (section) {
+                        const top = section.offsetTop;
+                        const height = section.offsetHeight;
+                        if (scrollPos >= top && scrollPos < top + height) {
+                            currentActiveSection = section;
+                        }
+                    }
+                });
+
+                if (currentActiveSection) {
+                    const activeId = currentActiveSection.getAttribute("id");
+                    navLinks.forEach((link) => {
+                        const href = link.getAttribute("href");
+                        // Remove active class from all links
+                        link.classList.remove("active");
+                        // Remove existing badge
+                        const existingBadge = link.querySelector(".nav-badge");
+                        if (existingBadge) {
+                            existingBadge.remove();
+                        }
+
+                        // Add active class and badge to matching link
+                        if (href === `#${activeId}`) {
+                            link.classList.add("active");
+                            const count = link.getAttribute("data-count");
+                            if (count) {
+                                const badge = document.createElement("span");
+                                badge.className = "nav-badge";
+                                badge.textContent = count;
+                                link.appendChild(badge);
+                            }
+                        }
+                    });
+                }
+            }
+
             window.addEventListener("scroll", () => {
                 const y = window.scrollY;
                 navbar.classList.toggle("scrolled", y > 60);
                 backTop.classList.toggle("visible", y > 500);
+                updateScrollSpy();
             });
 
             const navToggle = document.getElementById("navToggle");
@@ -2870,6 +2973,8 @@
             document
                 .querySelectorAll(".mobile-link")
                 .forEach((l) => l.addEventListener("click", closeMobile));
+
+            window.addEventListener("load", updateScrollSpy);
 
             function toggleSearch() {
                 const el = document.getElementById("searchOverlay");
