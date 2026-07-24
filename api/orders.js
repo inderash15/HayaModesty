@@ -1,10 +1,10 @@
-const { connectToDatabase } = require('./_db');
-const { getAuthUser, verifyAdmin } = require('./_auth');
+const { connectToDatabase } = require('../utils/mongodb');
+const { getAuthUser, verifyAdmin } = require('../utils/jwt');
 const { ObjectId } = require('mongodb');
 
 module.exports = async (req, res) => {
     res.setHeader('Access-Control-Allow-Origin', '*');
-    res.setHeader('Access-Control-Allow-Methods', 'GET, POST, OPTIONS');
+    res.setHeader('Access-Control-Allow-Methods', 'GET, POST, PUT, OPTIONS');
     res.setHeader('Access-Control-Allow-Headers', 'Content-Type, Authorization');
 
     if (req.method === 'OPTIONS') {
@@ -79,6 +79,31 @@ module.exports = async (req, res) => {
             });
         } catch (e) {
             return res.status(500).json({ error: 'Failed to place order: ' + e.message });
+        }
+    }
+
+    // PUT: Update Order (Admin only)
+    if (req.method === 'PUT') {
+        const admin = verifyAdmin(req);
+        if (!admin) {
+            return res.status(403).json({ error: 'Admin access required' });
+        }
+
+        try {
+            const bodyData = req.body || JSON.parse(req.body || '{}');
+            const { id, status, paymentStatus } = bodyData;
+            if (!id) {
+                return res.status(400).json({ error: 'Order ID is required' });
+            }
+
+            const updateFields = {};
+            if (status) updateFields.status = status;
+            if (paymentStatus) updateFields.paymentStatus = paymentStatus;
+
+            await ordersCollection.updateOne({ _id: new ObjectId(id) }, { $set: updateFields });
+            return res.status(200).json({ success: true, message: 'Order updated successfully' });
+        } catch (e) {
+            return res.status(500).json({ error: 'Failed to update order: ' + e.message });
         }
     }
 

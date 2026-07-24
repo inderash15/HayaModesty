@@ -1,8 +1,7 @@
-const handler = require('../api/products.js');
 const fs = require('fs');
 const path = require('path');
 
-// Load .env
+// Load .env first
 if (fs.existsSync(path.join(__dirname, '..', '.env'))) {
     const dotenv = fs.readFileSync(path.join(__dirname, '..', '.env'), 'utf8');
     dotenv.split('\n').forEach(line => {
@@ -17,6 +16,9 @@ if (fs.existsSync(path.join(__dirname, '..', '.env'))) {
         }
     });
 }
+
+// Require handler after environment variables are loaded
+const handler = require('../api/products.js');
 
 // Mock req and res
 const req = {

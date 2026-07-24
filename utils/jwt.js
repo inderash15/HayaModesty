@@ -19,4 +19,4 @@ function verifyAdmin(req) {
     return user && user.role === 'admin' ? user : null;
 }
 
-module.exports = { getAuthUser, verifyAdmin };
+module.exports = { getAuthUser, verifyAdmin, JWT_SECRET };

@@ -1,10 +1,10 @@
-const { connectToDatabase } = require('./_db');
-const { getAuthUser, verifyAdmin } = require('./_auth');
+const { connectToDatabase } = require('../utils/mongodb');
+const { getAuthUser, verifyAdmin } = require('../utils/jwt');
 const { ObjectId } = require('mongodb');
 
 module.exports = async (req, res) => {
     res.setHeader('Access-Control-Allow-Origin', '*');
-    res.setHeader('Access-Control-Allow-Methods', 'GET, PUT, OPTIONS');
+    res.setHeader('Access-Control-Allow-Methods', 'GET, POST, PUT, OPTIONS');
     res.setHeader('Access-Control-Allow-Headers', 'Content-Type, Authorization');
 
     if (req.method === 'OPTIONS') {
@@ -12,13 +12,23 @@ module.exports = async (req, res) => {
         return;
     }
 
+    const { db } = await connectToDatabase();
+    const usersCollection = db.collection('users');
+
+    // POST: Support user creation/registration directly if required
+    if (req.method === 'POST') {
+        try {
+            const registerHandler = require('./auth/register');
+            return registerHandler(req, res);
+        } catch (e) {
+            return res.status(500).json({ error: 'Failed to create user: ' + e.message });
+        }
+    }
+
     const authUser = getAuthUser(req);
     if (!authUser) {
         return res.status(401).json({ error: 'Authentication required' });
     }
-
-    const { db } = await connectToDatabase();
-    const usersCollection = db.collection('users');
 
     // GET: Admin gets all users, User gets their profile
     if (req.method === 'GET') {
@@ -26,7 +36,7 @@ module.exports = async (req, res) => {
             if (authUser.role === 'admin') {
                 const users = await usersCollection.find({}).sort({ createdAt: -1 }).toArray();
                 const sanitized = users.map(u => ({
-                    id: u._id.toString(),
+                    id: u.id || u._id.toString(),
                     name: u.name,
                     email: u.email,
                     role: u.role,
@@ -36,12 +46,16 @@ module.exports = async (req, res) => {
                 }));
                 return res.status(200).json(sanitized);
             } else {
-                const user = await usersCollection.findOne({ _id: new ObjectId(authUser.id) });
+                let query = { id: authUser.id };
+                if (ObjectId.isValid(authUser.id)) {
+                    query = { $or: [{ _id: new ObjectId(authUser.id) }, { id: authUser.id }] };
+                }
+                const user = await usersCollection.findOne(query);
                 if (!user) {
                     return res.status(404).json({ error: 'User not found' });
                 }
                 return res.status(200).json({
-                    id: user._id.toString(),
+                    id: user.id || user._id.toString(),
                     name: user.name,
                     email: user.email,
                     role: user.role,
@@ -71,8 +85,13 @@ module.exports = async (req, res) => {
                 address: address || ''
             };
 
+            let query = { id: authUser.id };
+            if (ObjectId.isValid(authUser.id)) {
+                query = { $or: [{ _id: new ObjectId(authUser.id) }, { id: authUser.id }] };
+            }
+
             await usersCollection.updateOne(
-                { _id: new ObjectId(authUser.id) },
+                query,
                 { $set: updateFields }
             );
 

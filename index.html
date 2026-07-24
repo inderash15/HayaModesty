@@ -2508,12 +2508,12 @@
                 <button class="auth-close" onclick="closeAuth()" aria-label="Close"><i class="fas fa-times"></i></button>
                 <h2 id="authTitle">Welcome Back</h2>
                 <p id="authSub">Login to your account</p>
-                <div id="authForm">
-                    <input type="text" id="authName" placeholder="Full Name" style="display:none;" />
-                    <input type="email" id="authEmail" placeholder="Email address" />
-                    <input type="password" id="authPassword" placeholder="Password" />
-                    <button class="btn btn-primary" onclick="handleAuth()" id="authBtn"><i class="fas fa-sign-in-alt"></i> Login</button>
-                </div>
+                <form id="authForm" onsubmit="event.preventDefault(); handleAuth();">
+                    <input type="text" id="authName" placeholder="Full Name" style="display:none;" autocomplete="name" />
+                    <input type="email" id="authEmail" placeholder="Email address" autocomplete="email" required />
+                    <input type="password" id="authPassword" placeholder="Password" autocomplete="current-password" required />
+                    <button type="submit" class="btn btn-primary" id="authBtn" style="width: 100%;"><i class="fas fa-sign-in-alt"></i> Login</button>
+                </form>
                 <div class="auth-switch">
                     <span id="authSwitchText">Don't have an account?</span>
                     <a onclick="switchAuthMode()" id="authSwitchLink">Register</a>
@@ -2809,8 +2809,10 @@
                 <h2>Admin Login</h2>
                 <p class="admin-sub">Enter password to access admin panel</p>
                 <div class="admin-login-error" id="adminLoginError">Invalid password</div>
-                <input type="password" id="adminPasswordInput" placeholder="Enter password" onkeydown="if(event.key==='Enter')loginAdmin()" />
-                <button class="btn btn-primary" onclick="loginAdmin()"><i class="fas fa-sign-in-alt"></i> Login</button>
+                <form id="adminLoginForm" onsubmit="event.preventDefault(); loginAdmin();">
+                    <input type="password" id="adminPasswordInput" placeholder="Enter password" autocomplete="current-password" required style="width: 100%; margin-bottom: 8px;" />
+                    <button type="submit" class="btn btn-primary" style="width: 100%;"><i class="fas fa-sign-in-alt"></i> Login</button>
+                </form>
                 <button class="btn btn-secondary" style="margin-top:8px;width:100%;color:#000;border-color:#000;" onclick="closeAdmin('adminLoginOverlay')">Cancel</button>
             </div>
         </div>
@@ -3093,10 +3095,15 @@
                 } catch (e) {
                     console.warn('LocalStorage quota exceeded. Storing in-memory and on server.', e);
                 }
+                const token = localStorage.getItem('hm_token');
+                const headers = { 'Content-Type': 'application/json' };
+                if (token) {
+                    headers['Authorization'] = `Bearer ${token}`;
+                }
                 try {
                     await fetch('/api/bin', {
                         method: 'POST',
-                        headers: { 'Content-Type': 'application/json' },
+                        headers,
                         body: JSON.stringify(bin)
                     });
                 } catch (e) {
@@ -3785,7 +3792,7 @@
             async function loginAdmin() {
                 const pw = document.getElementById('adminPasswordInput').value;
                 try {
-                    const res = await fetch('/api/auth/login', {
+                    const res = await fetch('/api/admin/login', {
                         method: 'POST',
                         headers: { 'Content-Type': 'application/json' },
                         body: JSON.stringify({ email: 'admin@hayamodesty.com', password: pw })
