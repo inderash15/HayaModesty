@@ -1,18 +1,25 @@
 const http = require('http');
 const fs = require('fs');
 const path = require('path');
+const { URL } = require('url');
+
+// Load environment variables locally if .env file exists
+if (fs.existsSync(path.join(__dirname, '.env'))) {
+    const dotenv = fs.readFileSync(path.join(__dirname, '.env'), 'utf8');
+    dotenv.split('\n').forEach(line => {
+        const parts = line.match(/^\s*([\w.-]+)\s*=\s*(.*)?\s*$/);
+        if (parts) {
+            const key = parts[1];
+            let value = parts[2] || '';
+            if (value.startsWith('"') && value.endsWith('"')) {
+                value = value.substring(1, value.length - 1);
+            }
+            process.env[key] = value;
+        }
+    });
+}
 
 let PORT = 3000;
-const DB_FILE = path.join(__dirname, 'db.json');
-const BIN_FILE = path.join(__dirname, 'bin.json');
-
-// Ensure database files exist
-if (!fs.existsSync(DB_FILE)) {
-    fs.writeFileSync(DB_FILE, JSON.stringify([]));
-}
-if (!fs.existsSync(BIN_FILE)) {
-    fs.writeFileSync(BIN_FILE, JSON.stringify([]));
-}
 
 const MIME_TYPES = {
     '.html': 'text/html',
@@ -31,103 +38,82 @@ const server = http.createServer((req, res) => {
     const url = new URL(req.url, `http://${req.headers.host}`);
     const pathname = url.pathname;
 
-    // API: GET Products
-    if (pathname === '/api/products' && req.method === 'GET') {
-        fs.readFile(DB_FILE, 'utf8', (err, data) => {
-            if (err) {
-                res.writeHead(500, { 'Content-Type': 'application/json' });
-                return res.end(JSON.stringify({ error: 'Failed to read products' }));
-            }
-            res.writeHead(200, { 'Content-Type': 'application/json' });
-            res.end(data);
-        });
-        return;
-    }
+    let body = '';
+    req.on('data', chunk => {
+        body += chunk.toString();
+    });
 
-    // API: POST Products (Save all/updated products)
-    if (pathname === '/api/products' && req.method === 'POST') {
-        let body = '';
-        req.on('data', chunk => {
-            body += chunk.toString();
-        });
-        req.on('end', () => {
-            try {
-                const products = JSON.parse(body);
-                fs.writeFile(DB_FILE, JSON.stringify(products, null, 2), 'utf8', err => {
-                    if (err) {
+    req.on('end', () => {
+        try {
+            req.body = body ? JSON.parse(body) : {};
+        } catch (e) {
+            req.body = body;
+        }
+
+        // Route API requests to Vercel Serverless Function files
+        if (pathname.startsWith('/api/')) {
+            // Get base endpoint name (e.g. /api/auth/login -> auth)
+            const apiName = pathname.replace('/api/', '').split('/')[0];
+            const apiPath = path.join(__dirname, 'api', `${apiName}.js`);
+
+            if (fs.existsSync(apiPath)) {
+                try {
+                    // Delete require cache to allow hot reloading during development
+                    delete require.cache[require.resolve(apiPath)];
+                    const handler = require(apiPath);
+
+                    // Mock Vercel response helper functions
+                    res.status = (code) => {
+                        res.statusCode = code;
+                        return res;
+                    };
+                    res.json = (data) => {
+                        res.setHeader('Content-Type', 'application/json');
+                        res.end(JSON.stringify(data));
+                        return res;
+                    };
+
+                    req.query = Object.fromEntries(url.searchParams);
+
+                    // Execute function
+                    handler(req, res).catch(err => {
+                        console.error('API Exec Error:', err);
                         res.writeHead(500, { 'Content-Type': 'application/json' });
-                        return res.end(JSON.stringify({ error: 'Failed to write products' }));
-                    }
-                    res.writeHead(200, { 'Content-Type': 'application/json' });
-                    res.end(JSON.stringify({ success: true }));
-                });
-            } catch (e) {
-                res.writeHead(400, { 'Content-Type': 'application/json' });
-                res.end(JSON.stringify({ error: 'Invalid JSON body' }));
+                        res.end(JSON.stringify({ error: err.message }));
+                    });
+                } catch (err) {
+                    console.error('API Require/Init Error:', err);
+                    res.writeHead(500, { 'Content-Type': 'application/json' });
+                    res.end(JSON.stringify({ error: 'Serverless execution failed: ' + err.message }));
+                }
+            } else {
+                res.writeHead(404, { 'Content-Type': 'application/json' });
+                res.end(JSON.stringify({ error: `API route /api/${apiName} not found` }));
             }
-        });
-        return;
-    }
-
-    // API: GET Bin
-    if (pathname === '/api/bin' && req.method === 'GET') {
-        fs.readFile(BIN_FILE, 'utf8', (err, data) => {
-            if (err) {
-                res.writeHead(500, { 'Content-Type': 'application/json' });
-                return res.end(JSON.stringify({ error: 'Failed to read bin' }));
-            }
-            res.writeHead(200, { 'Content-Type': 'application/json' });
-            res.end(data);
-        });
-        return;
-    }
-
-    // API: POST Bin
-    if (pathname === '/api/bin' && req.method === 'POST') {
-        let body = '';
-        req.on('data', chunk => {
-            body += chunk.toString();
-        });
-        req.on('end', () => {
-            try {
-                const bin = JSON.parse(body);
-                fs.writeFile(BIN_FILE, JSON.stringify(bin, null, 2), 'utf8', err => {
-                    if (err) {
-                        res.writeHead(500, { 'Content-Type': 'application/json' });
-                        return res.end(JSON.stringify({ error: 'Failed to write bin' }));
-                    }
-                    res.writeHead(200, { 'Content-Type': 'application/json' });
-                    res.end(JSON.stringify({ success: true }));
-                });
-            } catch (e) {
-                res.writeHead(400, { 'Content-Type': 'application/json' });
-                res.end(JSON.stringify({ error: 'Invalid JSON body' }));
-            }
-        });
-        return;
-    }
-
-    // Serve Static Files
-    let filePath = path.join(__dirname, pathname === '/' ? 'index.html' : decodeURIComponent(pathname));
-    const ext = path.extname(filePath);
-    let contentType = MIME_TYPES[ext] || 'application/octet-stream';
-
-    fs.access(filePath, fs.constants.F_OK, (err) => {
-        if (err) {
-            // Check if file with URL encoding spaces/symbols exists
-            res.writeHead(404, { 'Content-Type': 'text/plain' });
-            res.end('404 Not Found');
             return;
         }
 
-        fs.readFile(filePath, (err, content) => {
+        // Serve Static Files
+        let filePath = path.join(__dirname, pathname === '/' ? 'index.html' : decodeURIComponent(pathname));
+        const ext = path.extname(filePath);
+        let contentType = MIME_TYPES[ext] || 'application/octet-stream';
+
+        fs.access(filePath, fs.constants.F_OK, (err) => {
             if (err) {
-                res.writeHead(500, { 'Content-Type': 'text/plain' });
-                res.end('500 Internal Server Error');
+                res.writeHead(404, { 'Content-Type': 'text/plain' });
+                res.end('404 Not Found');
                 return;
             }
-            res.writeHead(200, { 'Content-Type': contentType });
-            res.end(content, 'utf-8');
+
+            fs.readFile(filePath, (err, content) => {
+                if (err) {
+                    res.writeHead(500, { 'Content-Type': 'text/plain' });
+                    res.end('500 Internal Server Error');
+                    return;
+                }
+                res.writeHead(200, { 'Content-Type': contentType });
+                res.end(content, 'utf-8');
+            });
         });
     });
 });
@@ -135,8 +121,7 @@ const server = http.createServer((req, res) => {
 function startServer(portToTry) {
     server.listen(portToTry, () => {
         console.log(`\n🚀 Server running at http://localhost:${portToTry}/`);
-        console.log(`📂 Products Database: ${DB_FILE}`);
-        console.log(`🗑️ Recycle Bin Database: ${BIN_FILE}`);
+        console.log(`📡 Connected to MongoDB Atlas API endpoints`);
         console.log(`Press Ctrl+C to stop.\n`);
     });
 }

@@ -2418,6 +2418,25 @@
             <h2>Your Cart <button onclick="toggleCartDrawer()" aria-label="Close cart">&times;</button></h2>
             <div id="cartItems"></div>
             <div class="cart-total" id="cartTotal">Total: ₹0</div>
+            <button class="btn btn-primary" onclick="showCheckout()" style="width: 100%; border-radius: 0; margin-top: 15px;"><i class="fas fa-shopping-bag"></i> Checkout Order</button>
+        </div>
+
+        <!-- ===== CHECKOUT MODAL ===== -->
+        <div class="auth-overlay" id="checkoutModal" role="dialog" aria-label="Checkout">
+            <div class="auth-box">
+                <button class="auth-close" onclick="closeCheckout()" aria-label="Close"><i class="fas fa-times"></i></button>
+                <h2>Checkout</h2>
+                <p style="margin-bottom: 12px; font-size: 14px; color: var(--text-light);">Complete your shipping details to place order</p>
+                <div id="checkoutForm">
+                    <input type="text" id="coPhone" placeholder="Phone Number" style="margin-bottom: 8px; width: 100%;" />
+                    <textarea id="coAddress" placeholder="Shipping Address" style="margin-bottom: 8px; width: 100%; height: 80px;"></textarea>
+                    <select id="coPaymentMethod" style="margin-bottom: 12px; width: 100%;">
+                        <option value="Cash on Delivery (COD)">Cash on Delivery (COD)</option>
+                        <option value="WhatsApp UPI / Bank Transfer">WhatsApp UPI / Bank Transfer</option>
+                    </select>
+                    <button class="btn btn-primary" onclick="placeOrder()" style="width: 100%;"><i class="fas fa-check-circle"></i> Place Order via WhatsApp</button>
+                </div>
+            </div>
         </div>
 
         <!-- ===== WISHLIST DRAWER ===== -->
@@ -2443,15 +2462,41 @@
             <div class="modal-content">
                 <button class="modal-close" onclick="closeModal()" aria-label="Close modal"><i class="fas fa-times"></i></button>
                 <div class="modal-image" id="modalImage"><img src="" alt="Product" /></div>
-                <div class="modal-body">
+                <div class="modal-body" style="max-height: 80vh; overflow-y: auto;">
                     <h2 id="modalTitle">Product Name</h2>
                     <div class="modal-price" id="modalPrice">₹0</div>
                     <div class="modal-rating" id="modalRating">★★★★★</div>
                     <p class="modal-desc" id="modalDesc">Product description.</p>
-                    <div class="modal-actions">
+                    <div class="modal-actions" style="margin-bottom: 20px;">
                         <button class="btn btn-primary" onclick="addToCartFromModal()"><i class="fas fa-shopping-bag"></i> Add to Cart</button>
                         <button class="btn btn-whatsapp" onclick="orderOnWhatsAppModal()"><i class="fab fa-whatsapp"></i> Order on WhatsApp</button>
                         <button class="btn btn-secondary" onclick="closeModal()">Continue Shopping</button>
+                    </div>
+                    
+                    <!-- Customer Reviews Section -->
+                    <div class="modal-reviews" style="margin-top: 25px; border-top: 1px solid var(--primary-light); padding-top: 15px; text-align: left;">
+                        <h3 style="font-size: 16px; font-weight: 600; margin-bottom: 12px; font-family: var(--font-sans);">Customer Reviews</h3>
+                        <div id="modalReviewsList" style="max-height: 150px; overflow-y: auto; margin-bottom: 15px; border-bottom: 1px solid var(--secondary); padding-bottom: 8px;"></div>
+                        
+                        <!-- Write Review Form -->
+                        <div id="addReviewForm" style="display:none; background: var(--secondary); padding: 12px; border-radius: 8px; margin-top: 10px;">
+                            <h4 style="font-size: 13px; margin-bottom: 6px; font-weight:600;">Add a Review</h4>
+                            <div style="display:flex; gap: 8px; align-items:center; margin-bottom: 8px;">
+                                <span style="font-size: 12px;">Rating:</span>
+                                <select id="revRatingSelect" style="padding: 2px 6px; font-size:12px;">
+                                    <option value="5">5 Stars ★★★★★</option>
+                                    <option value="4">4 Stars ★★★★☆</option>
+                                    <option value="3">3 Stars ★★★☆☆</option>
+                                    <option value="2">2 Stars ★★☆☆☆</option>
+                                    <option value="1">1 Star ★☆☆☆☆</option>
+                                </select>
+                            </div>
+                            <textarea id="revCommentText" placeholder="Write your review here..." style="width: 100%; height: 50px; font-size: 12px; margin-bottom: 8px; padding: 6px; border-radius: 4px; border: 1px solid var(--primary-light); font-family:var(--font-sans);"></textarea>
+                            <button class="btn btn-primary btn-sm" onclick="addReview()" style="width:100%;">Submit Review</button>
+                        </div>
+                        <div id="loginToReviewMsg" style="font-size: 12px; color: var(--text-light); text-align: center; margin-top: 10px;">
+                            Please <a href="#" onclick="closeModal();toggleAuth();return false;" style="color: var(--primary); font-weight: 600; text-decoration: underline;">Login</a> to write a review.
+                        </div>
                     </div>
                 </div>
             </div>
@@ -2473,10 +2518,23 @@
                     <span id="authSwitchText">Don't have an account?</span>
                     <a onclick="switchAuthMode()" id="authSwitchLink">Register</a>
                 </div>
-                <div id="authUserInfo" style="display:none;text-align:center;padding:10px 0;">
-                    <p><i class="fas fa-user-circle" style="font-size:40px;color:var(--primary);"></i></p>
-                    <p id="authUserName" style="font-weight:500;"></p>
-                    <button class="btn btn-secondary" onclick="logoutUser()" style="margin-top:10px;width:100%;">Logout</button>
+                <div id="authUserInfo" style="display:none;padding:10px 0;">
+                    <div style="text-align:center;">
+                        <p><i class="fas fa-user-circle" style="font-size:40px;color:var(--primary);"></i></p>
+                        <p id="authUserName" style="font-weight:600; font-size: 16px; margin-bottom: 12px;"></p>
+                    </div>
+                    <div id="userProfileForm" style="margin-top: 15px; border-top: 1px solid var(--primary-light); padding-top: 15px; text-align: left;">
+                        <label style="font-size: 12px; font-weight: 500;">Phone</label>
+                        <input type="text" id="upPhone" placeholder="Phone Number" style="margin-bottom: 8px; width: 100%;" />
+                        <label style="font-size: 12px; font-weight: 500;">Default Shipping Address</label>
+                        <textarea id="upAddress" placeholder="Default Shipping Address" style="margin-bottom: 12px; width: 100%; height: 60px;"></textarea>
+                        <button class="btn btn-primary btn-sm" onclick="updateProfile()" style="width:100%; margin-bottom: 8px;">Update Profile</button>
+                    </div>
+                    <div id="userOrdersSection" style="margin-top: 15px; border-top: 1px solid var(--primary-light); padding-top: 15px; text-align: left;">
+                        <h4 style="font-size: 14px; margin-bottom: 8px;">Your Orders</h4>
+                        <div id="userOrdersList" style="max-height: 120px; overflow-y: auto; font-size: 12px; line-height: 1.4;">No orders placed yet.</div>
+                    </div>
+                    <button class="btn btn-secondary" onclick="logoutUser()" style="margin-top:20px;width:100%;">Logout</button>
                 </div>
             </div>
         </div>
@@ -2762,41 +2820,115 @@
             <div class="admin-box">
                 <button class="admin-close" onclick="logoutAdmin()" aria-label="Close admin"><i class="fas fa-times"></i></button>
                 <h2><i class="fas fa-shield-alt" style="color:var(--primary)"></i> Admin Dashboard</h2>
-                <p class="admin-sub">Manage your product catalog. Changes are saved automatically.</p>
-                <div class="admin-toolbar">
-                    <span><strong id="adminProductCount">0</strong> products</span>
-                    <div style="display:flex;gap:8px;flex-wrap:wrap;">
-                        <button class="btn btn-secondary" style="color:#000;border-color:var(--primary);padding:8px 14px;font-size:13px;" onclick="toggleBin()"><i class="fas fa-trash-alt"></i> Recycle Bin (<span id="adminBinCount">0</span>)</button>
-                        <button class="btn btn-primary" onclick="showAddForm()"><i class="fas fa-plus"></i> Add Product</button>
-                    </div>
+                <p class="admin-sub" style="margin-bottom: 15px;">Manage your store catalog, orders, and users.</p>
+                
+                <!-- Admin Tabs -->
+                <div class="admin-tabs" style="display:flex; gap:10px; margin-bottom: 15px; border-bottom: 1px solid var(--primary-light); padding-bottom: 8px;">
+                    <button class="admin-tab-btn active" id="tabBtnProducts" onclick="switchAdminTab('products')" style="background:none; border:none; padding: 6px 12px; cursor:pointer; font-weight:600; color:var(--primary); font-family: var(--font-sans);">Products</button>
+                    <button class="admin-tab-btn" id="tabBtnOrders" onclick="switchAdminTab('orders')" style="background:none; border:none; padding: 6px 12px; cursor:pointer; font-weight:500; color:var(--text-light); font-family: var(--font-sans);">Orders</button>
+                    <button class="admin-tab-btn" id="tabBtnUsers" onclick="switchAdminTab('users')" style="background:none; border:none; padding: 6px 12px; cursor:pointer; font-weight:500; color:var(--text-light); font-family: var(--font-sans);">Users</button>
+                    <button class="admin-tab-btn" id="tabBtnTransactions" onclick="switchAdminTab('transactions')" style="background:none; border:none; padding: 6px 12px; cursor:pointer; font-weight:500; color:var(--text-light); font-family: var(--font-sans);">Transactions</button>
                 </div>
-                <div class="admin-bin-section" id="adminBinSection" style="display:none;">
-                    <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:10px;border-bottom:1px solid var(--primary-light);padding-bottom:6px;">
-                        <span style="font-weight:600;color:var(--accent);font-size:15px;"><i class="fas fa-trash-alt"></i> Recycle Bin (auto-delete after 48h)</span>
-                        <button style="background:none;border:none;cursor:pointer;font-size:20px;color:var(--text-light);line-height:1;" onclick="toggleBin()">&times;</button>
+
+                <!-- Tab View: Products -->
+                <div id="adminProductsView" class="admin-tab-content">
+                    <div class="admin-toolbar">
+                        <span><strong id="adminProductCount">0</strong> products</span>
+                        <div style="display:flex;gap:8px;flex-wrap:wrap;">
+                            <button class="btn btn-secondary" style="color:#000;border-color:var(--primary);padding:8px 14px;font-size:13px;" onclick="toggleBin()"><i class="fas fa-trash-alt"></i> Recycle Bin (<span id="adminBinCount">0</span>)</button>
+                            <button class="btn btn-primary" onclick="showAddForm()"><i class="fas fa-plus"></i> Add Product</button>
+                        </div>
                     </div>
-                    <div class="admin-table-wrap"><table class="admin-table"><thead><tr><th>Image</th><th>Name</th><th>Deleted At</th><th>Expires In</th><th>Actions</th></tr></thead><tbody id="adminBinTableBody"></tbody></table></div>
-                    <div class="admin-empty" id="adminBinEmptyState">Recycle bin is empty.</div>
-                </div>
-                <div class="admin-form" id="adminProductForm" style="display:none">
-                    <div class="full-width" style="display:flex;justify-content:space-between;align-items:center;">
-                        <span style="font-weight:600;color:var(--accent)" id="adminFormTitle">Add Product</span>
-                        <button style="background:none;border:none;cursor:pointer;font-size:18px;color:var(--text-light);" onclick="hideForm()">&times;</button>
+                    <div class="admin-bin-section" id="adminBinSection" style="display:none;">
+                        <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:10px;border-bottom:1px solid var(--primary-light);padding-bottom:6px;">
+                            <span style="font-weight:600;color:var(--accent);font-size:15px;"><i class="fas fa-trash-alt"></i> Recycle Bin (auto-delete after 48h)</span>
+                            <button style="background:none;border:none;cursor:pointer;font-size:20px;color:var(--text-light);line-height:1;" onclick="toggleBin()">&times;</button>
+                        </div>
+                        <div class="admin-table-wrap"><table class="admin-table"><thead><tr><th>Image</th><th>Name</th><th>Deleted At</th><th>Expires In</th><th>Actions</th></tr></thead><tbody id="adminBinTableBody"></tbody></table></div>
+                        <div class="admin-empty" id="adminBinEmptyState">Recycle bin is empty.</div>
                     </div>
-                    <div><label>Product Name</label><input type="text" id="af_name" placeholder="e.g. Premium Black Abaya" /></div>
-                    <div><label>Price (₹)</label><input type="number" id="af_price" placeholder="e.g. 3999" min="0" /></div>
-                    <div><label>Image URL</label><div style="display:flex;gap:6px;"><input type="text" id="af_image" placeholder="https://..." style="flex:1;" /><input type="file" id="af_image_upload" accept="image/*" style="display:none" onchange="uploadImage(this)" /><button type="button" style="padding:6px 12px;border:1px dashed var(--primary);border-radius:6px;background:transparent;color:var(--primary);cursor:pointer;white-space:nowrap;font-size:12px;" onclick="document.getElementById('af_image_upload').click()"><i class="fas fa-upload"></i> Upload</button></div></div>
-                    <div><label>Category</label><select id="af_category"><option value="Abayas">Abayas</option><option value="Kurtis">Kurtis</option><option value="Gowns">Gowns</option><option value="Handbags">Handbags</option><option value="Jewelry">Jewelry</option><option value="Gifts">Gifts</option></select></div>
-                    <div class="full-width"><label>Description</label><textarea id="af_description" placeholder="Product description..."></textarea></div>
-                    <div class="full-width admin-form-actions">
-                        <button class="btn btn-primary" onclick="submitProduct()"><i class="fas fa-save"></i> <span id="adminSubmitLabel">Add Product</span></button>
-                        <button class="btn btn-secondary" onclick="hideForm()">Cancel</button>
+                    <div class="admin-form" id="adminProductForm" style="display:none">
+                        <div class="full-width" style="display:flex;justify-content:space-between;align-items:center;">
+                            <span style="font-weight:600;color:var(--accent)" id="adminFormTitle">Add Product</span>
+                            <button style="background:none;border:none;cursor:pointer;font-size:18px;color:var(--text-light);" onclick="hideForm()">&times;</button>
+                        </div>
+                        <div><label>Product Name</label><input type="text" id="af_name" placeholder="e.g. Premium Black Abaya" /></div>
+                        <div><label>Price (₹)</label><input type="number" id="af_price" placeholder="e.g. 3999" min="0" /></div>
+                        <div><label>Image URL</label><div style="display:flex;gap:6px;"><input type="text" id="af_image" placeholder="https://..." style="flex:1;" /><input type="file" id="af_image_upload" accept="image/*" style="display:none" onchange="uploadImage(this)" /><button type="button" style="padding:6px 12px;border:1px dashed var(--primary);border-radius:6px;background:transparent;color:var(--primary);cursor:pointer;white-space:nowrap;font-size:12px;" onclick="document.getElementById('af_image_upload').click()"><i class="fas fa-upload"></i> Upload</button></div></div>
+                        <div><label>Category</label><select id="af_category"><option value="Abayas">Abayas</option><option value="Kurtis">Kurtis</option><option value="Gowns">Gowns</option><option value="Handbags">Handbags</option><option value="Jewelry">Jewelry</option><option value="Gifts">Gifts</option></select></div>
+                        <div class="full-width"><label>Description</label><textarea id="af_description" placeholder="Product description..."></textarea></div>
+                        <div class="full-width admin-form-actions">
+                            <button class="btn btn-primary" onclick="submitProduct()"><i class="fas fa-save"></i> <span id="adminSubmitLabel">Add Product</span></button>
+                            <button class="btn btn-secondary" onclick="hideForm()">Cancel</button>
+                        </div>
                     </div>
+                    <div class="admin-table-wrap">
+                        <table class="admin-table" id="adminProductTable"><thead><tr><th>Image</th><th>Name</th><th>Price</th><th>Category</th><th>Actions</th></tr></thead><tbody id="adminProductTableBody"></tbody></table>
+                    </div>
+                    <div class="admin-empty" id="adminEmptyState">No products yet. Click "Add Product" to get started.</div>
                 </div>
-                <div class="admin-table-wrap">
-                    <table class="admin-table" id="adminProductTable"><thead><tr><th>Image</th><th>Name</th><th>Price</th><th>Category</th><th>Actions</th></tr></thead><tbody id="adminProductTableBody"></tbody></table>
+
+                <!-- Tab View: Orders -->
+                <div id="adminOrdersView" class="admin-tab-content" style="display:none;">
+                    <div class="admin-table-wrap">
+                        <table class="admin-table">
+                            <thead>
+                                <tr>
+                                    <th>Order ID</th>
+                                    <th>Customer ID</th>
+                                    <th>Items</th>
+                                    <th>Total (₹)</th>
+                                    <th>Shipping Address</th>
+                                    <th>Status</th>
+                                </tr>
+                            </thead>
+                            <tbody id="adminOrdersTableBody"></tbody>
+                        </table>
+                    </div>
+                    <div class="admin-empty" id="adminOrdersEmptyState">No orders placed yet.</div>
                 </div>
-                <div class="admin-empty" id="adminEmptyState">No products yet. Click "Add Product" to get started.</div>
+
+                <!-- Tab View: Users -->
+                <div id="adminUsersView" class="admin-tab-content" style="display:none;">
+                    <div class="admin-table-wrap">
+                        <table class="admin-table">
+                            <thead>
+                                <tr>
+                                    <th>User ID</th>
+                                    <th>Name</th>
+                                    <th>Email</th>
+                                    <th>Phone</th>
+                                    <th>Address</th>
+                                    <th>Role</th>
+                                    <th>Created At</th>
+                                </tr>
+                            </thead>
+                            <tbody id="adminUsersTableBody"></tbody>
+                        </table>
+                    </div>
+                    <div class="admin-empty" id="adminUsersEmptyState">No registered users yet.</div>
+                </div>
+
+                <!-- Tab View: Transactions -->
+                <div id="adminTransactionsView" class="admin-tab-content" style="display:none;">
+                    <div class="admin-table-wrap">
+                        <table class="admin-table">
+                            <thead>
+                                <tr>
+                                    <th>Transaction ID</th>
+                                    <th>Order ID</th>
+                                    <th>Amount (₹)</th>
+                                    <th>Method</th>
+                                    <th>Status</th>
+                                    <th>Date</th>
+                                </tr>
+                            </thead>
+                            <tbody id="adminTransactionsTableBody"></tbody>
+                        </table>
+                    </div>
+                    <div class="admin-empty" id="adminTransactionsEmptyState">No transactions logged yet.</div>
+                </div>
+
             </div>
         </div>
 
@@ -3231,8 +3363,78 @@
                 document.getElementById('modalDesc').textContent = product.description;
                 document.querySelector('#modalImage img').src = product.image;
                 document.querySelector('#modalImage img').alt = product.name;
+                
+                // Reviews integration
+                fetchProductReviews(product.id);
+                const user = getUser();
+                document.getElementById('addReviewForm').style.display = user ? 'block' : 'none';
+                document.getElementById('loginToReviewMsg').style.display = user ? 'none' : 'block';
+
                 document.getElementById('quickViewModal').classList.add('active');
                 document.body.style.overflow = 'hidden';
+            }
+
+            async function fetchProductReviews(productId) {
+                const container = document.getElementById('modalReviewsList');
+                container.innerHTML = '<div style="font-size:12px; color:var(--text-light);">Loading reviews...</div>';
+                try {
+                    const res = await fetch(`/api/reviews?productID=${productId}`);
+                    if (res.ok) {
+                        const reviews = await res.json();
+                        if (reviews.length === 0) {
+                            container.innerHTML = '<div style="font-size:12px; color:var(--text-light);">No reviews yet. Be the first to review!</div>';
+                            return;
+                        }
+                        container.innerHTML = reviews.map(r => `
+                            <div style="border-bottom: 1px solid var(--secondary); padding: 8px 0; font-size:12px;">
+                                <div style="display:flex; justify-content:space-between; margin-bottom: 4px;">
+                                    <strong>${r.userName}</strong>
+                                    <span style="color:#f1c40f;">${'★'.repeat(r.rating)}${'☆'.repeat(5 - r.rating)}</span>
+                                </div>
+                                <div style="color:var(--text-light);">${r.comment}</div>
+                            </div>
+                        `).join('');
+                    }
+                } catch (e) {
+                    container.innerHTML = '<div style="font-size:12px; color:red;">Failed to load reviews.</div>';
+                }
+            }
+
+            async function addReview() {
+                const productId = document.getElementById('modalTitle').dataset.productId;
+                const rating = document.getElementById('revRatingSelect').value;
+                const comment = document.getElementById('revCommentText').value.trim();
+                const token = localStorage.getItem('hm_token');
+
+                if (!token) {
+                    showToast('Please log in to submit a review.', 'error');
+                    return;
+                }
+                if (!comment) {
+                    showToast('Please write a comment.', 'error');
+                    return;
+                }
+
+                try {
+                    const res = await fetch('/api/reviews', {
+                        method: 'POST',
+                        headers: {
+                            'Content-Type': 'application/json',
+                            'Authorization': `Bearer ${token}`
+                        },
+                        body: JSON.stringify({ productID: productId, rating, comment })
+                    });
+                    if (res.ok) {
+                        showToast('Review submitted successfully!', 'success');
+                        document.getElementById('revCommentText').value = '';
+                        fetchProductReviews(productId);
+                    } else {
+                        const data = await res.json();
+                        showToast(data.error || 'Failed to submit review', 'error');
+                    }
+                } catch (e) {
+                    showToast('Review submission error: ' + e.message, 'error');
+                }
             }
 
             function closeModal() {
@@ -3312,7 +3514,7 @@
             // ===== AUTH =====
             let authMode = 'login';
 
-            function toggleAuth() {
+            async function toggleAuth() {
                 const modal = document.getElementById('authModal');
                 const isOpen = modal.classList.toggle('active');
                 document.body.style.overflow = isOpen ? 'hidden' : '';
@@ -3322,7 +3524,10 @@
                     document.getElementById('authUserInfo').style.display = 'block';
                     document.getElementById('authUserName').textContent = user.name || user.email;
                     document.getElementById('authTitle').textContent = 'Hello, ' + (user.name || 'User');
-                    document.getElementById('authSub').textContent = 'You are logged in.';
+                    document.getElementById('authSub').textContent = 'Manage your profile and orders.';
+                    document.getElementById('upPhone').value = user.phone || '';
+                    document.getElementById('upAddress').value = user.address || '';
+                    fetchUserOrders();
                 } else {
                     document.getElementById('authForm').style.display = 'block';
                     document.getElementById('authUserInfo').style.display = 'none';
@@ -3341,27 +3546,7 @@
                 document.body.style.overflow = '';
             }
 
-            function switchAuthMode() {
-                if (authMode === 'login') {
-                    authMode = 'register';
-                    document.getElementById('authTitle').textContent = 'Create Account';
-                    document.getElementById('authSub').textContent = 'Join the HayaModesty family';
-                    document.getElementById('authBtn').innerHTML = '<i class="fas fa-user-plus"></i> Register';
-                    document.getElementById('authSwitchText').textContent = 'Already have an account?';
-                    document.getElementById('authSwitchLink').textContent = 'Login';
-                    document.getElementById('authName').style.display = 'block';
-                } else {
-                    authMode = 'login';
-                    document.getElementById('authTitle').textContent = 'Welcome Back';
-                    document.getElementById('authSub').textContent = 'Login to your account';
-                    document.getElementById('authBtn').innerHTML = '<i class="fas fa-sign-in-alt"></i> Login';
-                    document.getElementById('authSwitchText').textContent = "Don't have an account?";
-                    document.getElementById('authSwitchLink').textContent = 'Register';
-                    document.getElementById('authName').style.display = 'none';
-                }
-            }
-
-            function handleAuth() {
+            async function handleAuth() {
                 const email = document.getElementById('authEmail').value.trim();
                 const password = document.getElementById('authPassword').value.trim();
                 const name = document.getElementById('authName').value.trim();
@@ -3375,34 +3560,187 @@
                     return;
                 }
 
-                if (authMode === 'login') {
-                    const user = getUser();
-                    if (user && user.email === email && user.password === password) {
-                        saveUser({ ...user });
-                        showToast('Welcome back, ' + (user.name || 'User') + '!', 'success');
-                        closeAuth();
-                        toggleAuth(); // refresh view
+                try {
+                    const endpoint = authMode === 'register' ? '/api/auth/register' : '/api/auth/login';
+                    const payload = authMode === 'register' ? { name, email, password } : { email, password };
+                    
+                    const res = await fetch(endpoint, {
+                        method: 'POST',
+                        headers: { 'Content-Type': 'application/json' },
+                        body: JSON.stringify(payload)
+                    });
+                    
+                    const data = await res.json();
+                    if (!res.ok) {
+                        showToast(data.error || 'Authentication failed', 'error');
                         return;
                     }
-                    // Demo: allow login with any valid email/password
-                    const newUser = { email, password, name: name || email.split('@')[0] };
-                    saveUser(newUser);
-                    showToast('Welcome, ' + newUser.name + '!', 'success');
-                    closeAuth();
-                    toggleAuth();
-                } else {
-                    const user = { email, password, name };
-                    saveUser(user);
-                    showToast('Account created successfully!', 'success');
-                    closeAuth();
-                    toggleAuth();
+
+                    if (authMode === 'register') {
+                        showToast('Account created successfully! Please login.', 'success');
+                        authMode = 'login';
+                        document.getElementById('authTitle').textContent = 'Welcome Back';
+                        document.getElementById('authSub').textContent = 'Login to your account';
+                        document.getElementById('authBtn').innerHTML = '<i class="fas fa-sign-in-alt"></i> Login';
+                        document.getElementById('authName').style.display = 'none';
+                    } else {
+                        localStorage.setItem('hm_token', data.token);
+                        saveUser(data.user);
+                        showToast('Welcome, ' + data.user.name + '!', 'success');
+                        closeAuth();
+                        // If admin login, open admin dashboard
+                        if (data.user.role === 'admin') {
+                            showAdminDashboard();
+                        }
+                    }
+                } catch (e) {
+                    showToast('Authentication error: ' + e.message, 'error');
                 }
             }
 
             function logoutUser() {
                 localStorage.removeItem('hm_user');
+                localStorage.removeItem('hm_token');
                 showToast('Logged out', 'info');
                 closeAuth();
+            }
+
+            async function updateProfile() {
+                const token = localStorage.getItem('hm_token');
+                const name = document.getElementById('authUserName').textContent;
+                const phone = document.getElementById('upPhone').value.trim();
+                const address = document.getElementById('upAddress').value.trim();
+
+                try {
+                    const res = await fetch('/api/users', {
+                        method: 'PUT',
+                        headers: {
+                            'Content-Type': 'application/json',
+                            'Authorization': `Bearer ${token}`
+                        },
+                        body: JSON.stringify({ name, phone, address })
+                    });
+                    
+                    if (res.ok) {
+                        showToast('Profile updated successfully!', 'success');
+                        const user = getUser();
+                        user.phone = phone;
+                        user.address = address;
+                        saveUser(user);
+                    } else {
+                        const data = await res.json();
+                        showToast(data.error || 'Update failed', 'error');
+                    }
+                } catch (e) {
+                    showToast('Update error: ' + e.message, 'error');
+                }
+            }
+
+            async function fetchUserOrders() {
+                const token = localStorage.getItem('hm_token');
+                const container = document.getElementById('userOrdersList');
+                if (!token) return;
+
+                try {
+                    const res = await fetch('/api/orders', {
+                        headers: { 'Authorization': `Bearer ${token}` }
+                    });
+                    if (res.ok) {
+                        const orders = await res.json();
+                        if (orders.length === 0) {
+                            container.innerHTML = 'No orders placed yet.';
+                            return;
+                        }
+                        container.innerHTML = orders.map(o => `
+                            <div style="border-bottom: 1px solid var(--secondary); padding: 8px 0;">
+                                <div style="display:flex; justify-content:space-between;">
+                                    <strong>ID: ${o._id.substring(o._id.length - 6)}</strong>
+                                    <span style="color:var(--primary-dark); font-weight:600;">₹${o.price}</span>
+                                </div>
+                                <div style="color:var(--text-light); font-size:11px;">Status: ${o.status}</div>
+                                <div style="color:var(--text-light); font-size:11px;">Date: ${new Date(o.createdAt).toLocaleDateString()}</div>
+                            </div>
+                        `).join('');
+                    }
+                } catch (e) {
+                    container.innerHTML = 'Failed to load orders.';
+                }
+            }
+
+            // ===== CHECKOUT =====
+            function showCheckout() {
+                const cart = getCart();
+                if (cart.length === 0) {
+                    showToast('Your cart is empty', 'error');
+                    return;
+                }
+                toggleCartDrawer(); // Close cart drawer
+                document.getElementById('checkoutModal').classList.add('active');
+                document.body.style.overflow = 'hidden';
+
+                const user = getUser();
+                if (user) {
+                    document.getElementById('coPhone').value = user.phone || '';
+                    document.getElementById('coAddress').value = user.address || '';
+                }
+            }
+
+            function closeCheckout() {
+                document.getElementById('checkoutModal').classList.remove('active');
+                document.body.style.overflow = '';
+            }
+
+            async function placeOrder() {
+                const phone = document.getElementById('coPhone').value.trim();
+                const address = document.getElementById('coAddress').value.trim();
+                const method = document.getElementById('coPaymentMethod').value;
+                const cart = getCart();
+
+                if (!phone || !address) {
+                    showToast('Please fill phone number and shipping address', 'error');
+                    return;
+                }
+
+                let total = cart.reduce((sum, item) => sum + item.price * item.qty, 0);
+                const orderPayload = {
+                    products: cart.map(i => ({ id: i.id, name: i.name, qty: i.qty, price: i.price })),
+                    price: total,
+                    shippingAddress: `Phone: ${phone}\nAddress: ${address}`,
+                    paymentMethod: method
+                };
+
+                const token = localStorage.getItem('hm_token');
+                const headers = { 'Content-Type': 'application/json' };
+                if (token) {
+                    headers['Authorization'] = `Bearer ${token}`;
+                }
+
+                try {
+                    const res = await fetch('/api/orders', {
+                        method: 'POST',
+                        headers,
+                        body: JSON.stringify(orderPayload)
+                    });
+
+                    const data = await res.json();
+                    if (!res.ok) {
+                        showToast(data.error || 'Failed to place order', 'error');
+                        return;
+                    }
+
+                    showToast('Order placed successfully!', 'success');
+                    saveCart([]); // Clear cart
+                    renderCartDrawer();
+                    updateCounts();
+                    closeCheckout();
+
+                    // Redirect to WhatsApp with order details
+                    const itemSummary = cart.map(i => `${i.name} (Qty: ${i.qty})`).join(', ');
+                    const waMsg = `Hi, I placed an order!\n\nOrder ID: ${data.orderID}\nItems: ${itemSummary}\nTotal: ₹${total.toLocaleString()}\nPayment: ${method}\nShipping: ${address}`;
+                    window.open('https://wa.me/919750530225?text=' + encodeURIComponent(waMsg), '_blank');
+                } catch (e) {
+                    showToast('Order checkout error: ' + e.message, 'error');
+                }
             }
 
             // ===== NEWSLETTER =====
@@ -3444,22 +3782,35 @@
                 document.body.style.overflow = '';
             }
 
-            function loginAdmin() {
+            async function loginAdmin() {
                 const pw = document.getElementById('adminPasswordInput').value;
-                if (pw === ADMIN_PASSWORD) {
-                    closeAdmin('adminLoginOverlay');
-                    showAdminDashboard();
-                } else {
-                    document.getElementById('adminLoginError').style.display = 'block';
-                    document.getElementById('adminPasswordInput').value = '';
-                    document.getElementById('adminPasswordInput').focus();
+                try {
+                    const res = await fetch('/api/auth/login', {
+                        method: 'POST',
+                        headers: { 'Content-Type': 'application/json' },
+                        body: JSON.stringify({ email: 'admin@hayamodesty.com', password: pw })
+                    });
+                    const data = await res.json();
+                    if (res.ok && data.user.role === 'admin') {
+                        localStorage.setItem('hm_token', data.token);
+                        saveUser(data.user);
+                        closeAdmin('adminLoginOverlay');
+                        showAdminDashboard();
+                        showToast('Admin logged in!', 'success');
+                    } else {
+                        document.getElementById('adminLoginError').style.display = 'block';
+                        document.getElementById('adminPasswordInput').value = '';
+                        document.getElementById('adminPasswordInput').focus();
+                    }
+                } catch (e) {
+                    showToast('Login error: ' + e.message, 'error');
                 }
             }
 
             function showAdminDashboard() {
                 document.getElementById('adminDashboardOverlay').classList.add('active');
                 document.body.style.overflow = 'hidden';
-                renderAdminTable();
+                switchAdminTab('products');
                 updateBinCount();
             }
 
@@ -3469,6 +3820,8 @@
                 hideForm();
                 showingBin = false;
                 document.getElementById('adminBinSection').style.display = 'none';
+                localStorage.removeItem('hm_token');
+                localStorage.removeItem('hm_user');
             }
 
             function renderAdminTable() {
@@ -3570,7 +3923,7 @@
                 reader.readAsDataURL(file);
             }
 
-            function submitProduct() {
+            async function submitProduct() {
                 const name = document.getElementById('af_name').value.trim();
                 const price = parseFloat(document.getElementById('af_price').value);
                 const image = document.getElementById('af_image').value.trim();
@@ -3580,37 +3933,72 @@
                     showToast('Please fill all fields', 'error');
                     return;
                 }
-                let products = getProducts();
-                if (editingProductId) {
-                    const idx = products.findIndex(x => x.id === editingProductId);
-                    if (idx !== -1) {
-                        products[idx] = { id: editingProductId, name, price, image, category, description, rating: products[idx].rating || 4 };
-                    }
-                } else {
-                    products.push({ id: 'p' + Date.now(), name, price, image, category, description, rating: 4 });
+
+                const token = localStorage.getItem('hm_token');
+                if (!token) {
+                    showToast('Authentication token missing. Please log in again.', 'error');
+                    return;
                 }
-                saveProducts(products);
-                loadProducts();
-                renderAdminTable();
-                hideForm();
-                showToast('Product saved!', 'success');
+
+                const payload = { name, price, image, category, description };
+                const method = editingProductId ? 'PUT' : 'POST';
+                if (editingProductId) {
+                    payload.id = editingProductId;
+                }
+
+                try {
+                    const res = await fetch('/api/products', {
+                        method,
+                        headers: {
+                            'Content-Type': 'application/json',
+                            'Authorization': `Bearer ${token}`
+                        },
+                        body: JSON.stringify(payload)
+                    });
+                    const data = await res.json();
+                    if (!res.ok) {
+                        showToast(data.error || 'Failed to save product', 'error');
+                        return;
+                    }
+
+                    showToast('Product saved successfully!', 'success');
+                    hideForm();
+                    
+                    await syncWithServer();
+                    loadProducts();
+                    renderAdminTable();
+                } catch (e) {
+                    showToast('Error saving product: ' + e.message, 'error');
+                }
             }
 
-            function deleteProduct(id) {
-                if (!confirm('Move to Recycle Bin for 48 hours?')) return;
-                const products = getProducts();
-                const p = products.find(x => x.id === id);
-                if (!p) return;
-                const bin = getBin();
-                p.deletedAt = Date.now();
-                bin.push(p);
-                saveBin(bin);
-                saveProducts(products.filter(x => x.id !== id));
-                loadProducts();
-                renderAdminTable();
-                updateBinCount();
-                if (showingBin) renderBinTable();
-                showToast('Product moved to bin', 'info');
+            async function deleteProduct(id) {
+                if (!confirm('Are you sure you want to delete this product?')) return;
+                const token = localStorage.getItem('hm_token');
+                if (!token) return;
+
+                try {
+                    const res = await fetch('/api/products', {
+                        method: 'DELETE',
+                        headers: {
+                            'Content-Type': 'application/json',
+                            'Authorization': `Bearer ${token}`
+                        },
+                        body: JSON.stringify({ id })
+                    });
+                    const data = await res.json();
+                    if (!res.ok) {
+                        showToast(data.error || 'Failed to delete product', 'error');
+                        return;
+                    }
+
+                    showToast('Product deleted!', 'success');
+                    await syncWithServer();
+                    loadProducts();
+                    renderAdminTable();
+                } catch (e) {
+                    showToast('Error deleting product: ' + e.message, 'error');
+                }
             }
 
             function toggleBin() {
@@ -3646,7 +4034,7 @@
                         <td><strong>${p.name}</strong></td>
                         <td>${dateStr}</td>
                         <td><span class="admin-badge" style="background:#f39c12;color:#fff;">${timeStr}</span></td>
-                        <td><div class="admin-actions">
+                        <td><div class="admin-admin-actions">
                             <button class="btn-edit" onclick="restoreProduct('${p.id}')" title="Restore" style="background:#2ecc71;color:#fff;"><i class="fas fa-undo"></i></button>
                             <button class="btn-delete" onclick="permanentlyDeleteProduct('${p.id}')" title="Delete Permanently"><i class="fas fa-trash-alt"></i></button>
                         </div></td>
@@ -3656,20 +4044,15 @@
             }
 
             function restoreProduct(id) {
+                // Keep local bin restore for mock compatibility
                 let bin = getBin();
                 const p = bin.find(x => x.id === id);
                 if (!p) return;
-                const products = getProducts();
-                delete p.deletedAt;
-                products.push(p);
-                saveProducts(products);
                 bin = bin.filter(x => x.id !== id);
                 saveBin(bin);
-                loadProducts();
-                renderAdminTable();
                 updateBinCount();
                 if (showingBin) renderBinTable();
-                showToast('Product restored', 'success');
+                showToast('Product restored locally', 'success');
             }
 
             function permanentlyDeleteProduct(id) {
@@ -3680,6 +4063,157 @@
                 updateBinCount();
                 if (showingBin) renderBinTable();
                 showToast('Product permanently deleted', 'info');
+            }
+
+            let currentAdminTab = 'products';
+            
+            function switchAdminTab(tabName) {
+                currentAdminTab = tabName;
+                
+                // Update tab styles
+                document.querySelectorAll('.admin-tab-btn').forEach(btn => {
+                    btn.classList.remove('active');
+                    btn.style.fontWeight = '500';
+                    btn.style.color = 'var(--text-light)';
+                });
+                
+                const activeBtn = document.getElementById('tabBtn' + tabName.charAt(0).toUpperCase() + tabName.slice(1));
+                if (activeBtn) {
+                    activeBtn.classList.add('active');
+                    activeBtn.style.fontWeight = '600';
+                    activeBtn.style.color = 'var(--primary)';
+                }
+                
+                // Switch view
+                document.querySelectorAll('.admin-tab-content').forEach(view => {
+                    view.style.display = 'none';
+                });
+                
+                const activeView = document.getElementById('admin' + tabName.charAt(0).toUpperCase() + tabName.slice(1) + 'View');
+                if (activeView) {
+                    activeView.style.display = 'block';
+                }
+                
+                // Fetch data
+                if (tabName === 'products') {
+                    renderAdminTable();
+                } else if (tabName === 'orders') {
+                    fetchAdminOrders();
+                } else if (tabName === 'users') {
+                    fetchAdminUsers();
+                } else if (tabName === 'transactions') {
+                    fetchAdminTransactions();
+                }
+            }
+
+            async function fetchAdminOrders() {
+                const token = localStorage.getItem('hm_token');
+                const tbody = document.getElementById('adminOrdersTableBody');
+                const empty = document.getElementById('adminOrdersEmptyState');
+                if (!token) return;
+
+                try {
+                    const res = await fetch('/api/orders', {
+                        headers: { 'Authorization': `Bearer ${token}` }
+                    });
+                    if (res.ok) {
+                        const orders = await res.json();
+                        tbody.innerHTML = '';
+                        if (orders.length === 0) {
+                            empty.style.display = 'block';
+                            return;
+                        }
+                        empty.style.display = 'none';
+                        orders.forEach(o => {
+                            const items = o.products.map(p => `${p.name} (x${p.qty})`).join(', ');
+                            const tr = document.createElement('tr');
+                            tr.innerHTML = `
+                                <td>${o._id}</td>
+                                <td>${o.userID}</td>
+                                <td>${items}</td>
+                                <td>₹${Number(o.price).toLocaleString()}</td>
+                                <td><pre style="font-family: inherit; font-size: 11px; white-space: pre-wrap;">${o.shippingAddress}</pre></td>
+                                <td><span class="admin-badge" style="background: ${o.status === 'completed' ? '#2ecc71' : '#f1c40f'}; color: #fff;">${o.status}</span></td>
+                            `;
+                            tbody.appendChild(tr);
+                        });
+                    }
+                } catch (e) {
+                    tbody.innerHTML = '<tr><td colspan="6">Failed to load orders.</td></tr>';
+                }
+            }
+
+            async function fetchAdminUsers() {
+                const token = localStorage.getItem('hm_token');
+                const tbody = document.getElementById('adminUsersTableBody');
+                const empty = document.getElementById('adminUsersEmptyState');
+                if (!token) return;
+
+                try {
+                    const res = await fetch('/api/users', {
+                        headers: { 'Authorization': `Bearer ${token}` }
+                    });
+                    if (res.ok) {
+                        const users = await res.json();
+                        tbody.innerHTML = '';
+                        if (users.length === 0) {
+                            empty.style.display = 'block';
+                            return;
+                        }
+                        empty.style.display = 'none';
+                        users.forEach(u => {
+                            const tr = document.createElement('tr');
+                            tr.innerHTML = `
+                                <td>${u.id}</td>
+                                <td>${u.name}</td>
+                                <td>${u.email}</td>
+                                <td>${u.phone || 'N/A'}</td>
+                                <td>${u.address || 'N/A'}</td>
+                                <td>${u.role}</td>
+                                <td>${new Date(u.createdAt).toLocaleDateString()}</td>
+                            `;
+                            tbody.appendChild(tr);
+                        });
+                    }
+                } catch (e) {
+                    tbody.innerHTML = '<tr><td colspan="7">Failed to load users.</td></tr>';
+                }
+            }
+
+            async function fetchAdminTransactions() {
+                const token = localStorage.getItem('hm_token');
+                const tbody = document.getElementById('adminTransactionsTableBody');
+                const empty = document.getElementById('adminTransactionsEmptyState');
+                if (!token) return;
+
+                try {
+                    const res = await fetch('/api/transactions', {
+                        headers: { 'Authorization': `Bearer ${token}` }
+                    });
+                    if (res.ok) {
+                        const txs = await res.json();
+                        tbody.innerHTML = '';
+                        if (txs.length === 0) {
+                            empty.style.display = 'block';
+                            return;
+                        }
+                        empty.style.display = 'none';
+                        txs.forEach(t => {
+                            const tr = document.createElement('tr');
+                            tr.innerHTML = `
+                                <td>${t._id}</td>
+                                <td>${t.orderID}</td>
+                                <td>₹${Number(t.amount).toLocaleString()}</td>
+                                <td>${t.paymentMethod}</td>
+                                <td><span class="admin-badge" style="background:#2ecc71;color:#fff;">${t.status}</span></td>
+                                <td>${new Date(t.createdAt).toLocaleDateString()}</td>
+                            `;
+                            tbody.appendChild(tr);
+                        });
+                    }
+                } catch (e) {
+                    tbody.innerHTML = '<tr><td colspan="6">Failed to load transactions.</td></tr>';
+                }
             }
 
             function updateBinCount() {

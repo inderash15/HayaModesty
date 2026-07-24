@@ -1,0 +1,15 @@
+{
+  "name": "hayamodesty-backend",
+  "version": "1.0.0",
+  "description": "HayaModesty website with MongoDB backend deployed on Vercel Serverless Functions",
+  "main": "server.js",
+  "scripts": {
+    "start": "node server.js",
+    "dev": "vercel dev"
+  },
+  "dependencies": {
+    "bcryptjs": "^2.4.3",
+    "jsonwebtoken": "^9.0.2",
+    "mongodb": "^6.3.0"
+  }
+}
