@@ -1,5 +1,5 @@
 const { connectToDatabase } = require('../utils/mongodb');
-const { getAuthUser } = require('../utils/jwt');
+const { getAuthUser } = require('../utils/auth');
 const { ObjectId } = require('mongodb');
 
 module.exports = async (req, res) => {

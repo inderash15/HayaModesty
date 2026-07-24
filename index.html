@@ -3027,6 +3027,33 @@
                         } catch (err) {}
                     }
                 }
+
+                // Sync Cart and Wishlist if user is logged in
+                const token = localStorage.getItem('hm_token');
+                if (token) {
+                    try {
+                        const cartRes = await fetch('/api/cart', {
+                            headers: { 'Authorization': `Bearer ${token}` }
+                        });
+                        if (cartRes.ok) {
+                            const cartData = await cartRes.json();
+                            localStorage.setItem('hm_cart', JSON.stringify(cartData));
+                        }
+                    } catch (err) {
+                        console.error('Cart sync failed:', err);
+                    }
+                    try {
+                        const wlRes = await fetch('/api/wishlist', {
+                            headers: { 'Authorization': `Bearer ${token}` }
+                        });
+                        if (wlRes.ok) {
+                            const wlData = await wlRes.json();
+                            localStorage.setItem('hm_wishlist', JSON.stringify(wlData));
+                        }
+                    } catch (err) {
+                        console.error('Wishlist sync failed:', err);
+                    }
+                }
             }
 
             function getProducts() {
@@ -3057,8 +3084,23 @@
                 } catch (e) { return []; }
             }
 
-            function saveCart(cart) {
+            async function saveCart(cart) {
                 localStorage.setItem('hm_cart', JSON.stringify(cart));
+                const token = localStorage.getItem('hm_token');
+                if (token) {
+                    try {
+                        await fetch('/api/cart', {
+                            method: 'POST',
+                            headers: {
+                                'Content-Type': 'application/json',
+                                'Authorization': `Bearer ${token}`
+                            },
+                            body: JSON.stringify(cart)
+                        });
+                    } catch (e) {
+                        console.error('Failed to save cart to server:', e);
+                    }
+                }
             }
 
             function getWishlist() {
@@ -3067,8 +3109,23 @@
                 } catch (e) { return []; }
             }
 
-            function saveWishlist(wishlist) {
+            async function saveWishlist(wishlist) {
                 localStorage.setItem('hm_wishlist', JSON.stringify(wishlist));
+                const token = localStorage.getItem('hm_token');
+                if (token) {
+                    try {
+                        await fetch('/api/wishlist', {
+                            method: 'POST',
+                            headers: {
+                                'Content-Type': 'application/json',
+                                'Authorization': `Bearer ${token}`
+                            },
+                            body: JSON.stringify(wishlist)
+                        });
+                    } catch (e) {
+                        console.error('Failed to save wishlist to server:', e);
+                    }
+                }
             }
 
             function getUser() {
@@ -3595,7 +3652,10 @@
                         saveUser(data.user);
                         showToast('Welcome, ' + data.user.name + '!', 'success');
                         closeAuth();
-                        // If admin login, open admin dashboard
+                        await syncWithServer();
+                        updateCounts();
+                        renderCartDrawer();
+                        if (typeof renderWishlistDrawer === 'function') renderWishlistDrawer();
                         if (data.user.role === 'admin') {
                             showAdminDashboard();
                         }

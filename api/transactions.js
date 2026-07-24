@@ -1,5 +1,5 @@
 const { connectToDatabase } = require('../utils/mongodb');
-const { verifyAdmin } = require('../utils/jwt');
+const { verifyAdmin } = require('../utils/auth');
 
 module.exports = async (req, res) => {
     res.setHeader('Access-Control-Allow-Origin', '*');

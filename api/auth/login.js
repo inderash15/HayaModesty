@@ -1,5 +1,5 @@
 const { connectToDatabase } = require('../../utils/mongodb');
-const { JWT_SECRET } = require('../../utils/jwt');
+const { JWT_SECRET } = require('../../utils/auth');
 const bcrypt = require('bcryptjs');
 const jwt = require('jsonwebtoken');
 
