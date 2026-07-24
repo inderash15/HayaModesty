@@ -2,7 +2,7 @@ const http = require('http');
 const fs = require('fs');
 const path = require('path');
 
-const PORT = 3000;
+let PORT = 3000;
 const DB_FILE = path.join(__dirname, 'db.json');
 const BIN_FILE = path.join(__dirname, 'bin.json');
 
@@ -132,9 +132,23 @@ const server = http.createServer((req, res) => {
     });
 });
 
-server.listen(PORT, () => {
-    console.log(`\n🚀 Server running at http://localhost:${PORT}/`);
-    console.log(`📂 Products Database: ${DB_FILE}`);
-    console.log(`🗑️ Recycle Bin Database: ${BIN_FILE}`);
-    console.log(`Press Ctrl+C to stop.\n`);
+function startServer(portToTry) {
+    server.listen(portToTry, () => {
+        console.log(`\n🚀 Server running at http://localhost:${portToTry}/`);
+        console.log(`📂 Products Database: ${DB_FILE}`);
+        console.log(`🗑️ Recycle Bin Database: ${BIN_FILE}`);
+        console.log(`Press Ctrl+C to stop.\n`);
+    });
+}
+
+server.on('error', (err) => {
+    if (err.code === 'EADDRINUSE') {
+        console.log(`⚠️ Port ${PORT} is in use. Trying port ${PORT + 1}...`);
+        PORT++;
+        startServer(PORT);
+    } else {
+        console.error(err);
+    }
 });
+
+startServer(PORT);
