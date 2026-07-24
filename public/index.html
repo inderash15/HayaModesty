@@ -2810,6 +2810,7 @@
                 <p class="admin-sub">Enter password to access admin panel</p>
                 <div class="admin-login-error" id="adminLoginError">Invalid password</div>
                 <form id="adminLoginForm" onsubmit="event.preventDefault(); loginAdmin();">
+                    <input type="text" autocomplete="username" style="display:none;" value="admin@hayamodesty.com" />
                     <input type="password" id="adminPasswordInput" placeholder="Enter password" autocomplete="current-password" required style="width: 100%; margin-bottom: 8px;" />
                     <button type="submit" class="btn btn-primary" style="width: 100%;"><i class="fas fa-sign-in-alt"></i> Login</button>
                 </form>
