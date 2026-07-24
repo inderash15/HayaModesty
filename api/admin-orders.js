@@ -1,5 +1,5 @@
-const ordersHandler = require('../orders');
-const { verifyAdmin } = require('../../utils/auth');
+const ordersHandler = require('./orders');
+const { verifyAdmin } = require('../utils/auth');
 
 module.exports = async (req, res) => {
     // Enable CORS

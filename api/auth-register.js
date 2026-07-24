@@ -1,5 +1,5 @@
-const { connectToDatabase } = require('../../utils/mongodb');
-const { validateEmail, sanitizeString } = require('../../utils/validators');
+const { connectToDatabase } = require('../utils/mongodb');
+const { validateEmail, sanitizeString } = require('../utils/validators');
 const bcrypt = require('bcryptjs');
 
 module.exports = async (req, res) => {
