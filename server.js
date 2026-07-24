@@ -52,8 +52,15 @@ const server = http.createServer((req, res) => {
 
         // Route API requests to Vercel Serverless Function files
         if (pathname.startsWith('/api/')) {
-            // Get base endpoint name (e.g. /api/auth/login -> auth)
-            const apiName = pathname.replace('/api/', '').split('/')[0];
+            let apiRoute = pathname;
+            // Apply vercel.json rewrites locally
+            if (pathname === '/api/auth/login') apiRoute = '/api/auth-login';
+            else if (pathname === '/api/auth/register') apiRoute = '/api/auth-register';
+            else if (pathname === '/api/admin/login') apiRoute = '/api/admin-login';
+            else if (pathname === '/api/admin/products') apiRoute = '/api/admin-products';
+            else if (pathname === '/api/admin/orders') apiRoute = '/api/admin-orders';
+
+            const apiName = apiRoute.replace('/api/', '');
             const apiPath = path.join(__dirname, 'api', `${apiName}.js`);
 
             if (fs.existsSync(apiPath)) {
