@@ -93,8 +93,8 @@ const server = http.createServer((req, res) => {
             return;
         }
 
-        // Serve Static Files
-        let filePath = path.join(__dirname, pathname === '/' ? 'index.html' : decodeURIComponent(pathname));
+        // Serve Static Files from public folder
+        let filePath = path.join(__dirname, 'public', pathname === '/' ? 'index.html' : decodeURIComponent(pathname));
         const ext = path.extname(filePath);
         let contentType = MIME_TYPES[ext] || 'application/octet-stream';
 
