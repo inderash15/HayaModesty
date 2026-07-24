@@ -12,7 +12,13 @@ module.exports = async (req, res) => {
         return;
     }
 
-    const { db } = await connectToDatabase();
+    let db;
+    try {
+        const conn = await connectToDatabase();
+        db = conn.db;
+    } catch (e) {
+        return res.status(500).json({ error: 'Database connection failed: ' + e.message });
+    }
     const usersCollection = db.collection('users');
 
     // POST: Support user creation/registration directly if required
