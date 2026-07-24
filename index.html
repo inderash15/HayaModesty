@@ -2840,19 +2840,60 @@
             ];
 
             // ===== STORAGE HELPERS =====
-            function getProducts() {
+            let cachedProducts = JSON.parse(JSON.stringify(DEFAULT_PRODUCTS));
+            let cachedBin = [];
+
+            async function syncWithServer() {
                 try {
+                    const res = await fetch('/api/products');
+                    if (res.ok) {
+                        const data = await res.json();
+                        if (Array.isArray(data) && data.length > 0) {
+                            cachedProducts = data;
+                            localStorage.setItem('hm_products', JSON.stringify(data));
+                        }
+                    }
+                } catch (e) {
+                    console.log('Running offline or direct file mode. Using localStorage fallback.');
                     const stored = localStorage.getItem('hm_products');
                     if (stored) {
-                        const parsed = JSON.parse(stored);
-                        if (Array.isArray(parsed) && parsed.length > 0) return parsed;
+                        cachedProducts = JSON.parse(stored);
                     }
-                } catch (e) {}
-                return JSON.parse(JSON.stringify(DEFAULT_PRODUCTS));
+                }
+
+                try {
+                    const res = await fetch('/api/bin');
+                    if (res.ok) {
+                        const data = await res.json();
+                        if (Array.isArray(data)) {
+                            cachedBin = data;
+                            localStorage.setItem('hm_bin_products', JSON.stringify(data));
+                        }
+                    }
+                } catch (e) {
+                    const stored = localStorage.getItem('hm_bin_products');
+                    if (stored) {
+                        cachedBin = JSON.parse(stored);
+                    }
+                }
             }
 
-            function saveProducts(products) {
+            function getProducts() {
+                return cachedProducts;
+            }
+
+            async function saveProducts(products) {
+                cachedProducts = products;
                 localStorage.setItem('hm_products', JSON.stringify(products));
+                try {
+                    await fetch('/api/products', {
+                        method: 'POST',
+                        headers: { 'Content-Type': 'application/json' },
+                        body: JSON.stringify(products)
+                    });
+                } catch (e) {
+                    console.error('Failed to save products to server:', e);
+                }
             }
 
             function getCart() {
@@ -2886,23 +2927,24 @@
             }
 
             function getBin() {
-                try {
-                    const stored = localStorage.getItem('hm_bin_products');
-                    if (stored) {
-                        const parsed = JSON.parse(stored);
-                        if (Array.isArray(parsed)) {
-                            const now = Date.now();
-                            const valid = parsed.filter(p => (now - p.deletedAt) < 172800000);
-                            if (valid.length !== parsed.length) saveBin(valid);
-                            return valid;
-                        }
-                    }
-                } catch (e) {}
-                return [];
+                const now = Date.now();
+                const valid = cachedBin.filter(p => (now - p.deletedAt) < 172800000);
+                if (valid.length !== cachedBin.length) saveBin(valid);
+                return valid;
             }
 
-            function saveBin(bin) {
+            async function saveBin(bin) {
+                cachedBin = bin;
                 localStorage.setItem('hm_bin_products', JSON.stringify(bin));
+                try {
+                    await fetch('/api/bin', {
+                        method: 'POST',
+                        headers: { 'Content-Type': 'application/json' },
+                        body: JSON.stringify(bin)
+                    });
+                } catch (e) {
+                    console.error('Failed to save bin to server:', e);
+                }
             }
 
             // ===== RENDER PRODUCTS =====
@@ -3719,10 +3761,13 @@
             document.querySelectorAll('.reveal, .reveal-left, .reveal-right, .reveal-scale').forEach(el => observer.observe(el));
 
             // ===== INIT =====
-            loadProducts();
-            renderCartDrawer();
-            renderWishlistDrawer();
-            updateCounts();
+            (async function() {
+                await syncWithServer();
+                loadProducts();
+                renderCartDrawer();
+                renderWishlistDrawer();
+                updateCounts();
+            })();
 
             // Admin trigger on logo click
             let adminClickCount = 0;
