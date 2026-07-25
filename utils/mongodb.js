@@ -1,4 +1,9 @@
 const { MongoClient } = require('mongodb');
+const dns = require('dns');
+
+if (typeof dns.setDefaultResultOrder === 'function') {
+    dns.setDefaultResultOrder('ipv4first');
+}
 
 const uri = process.env.MONGODB_URI;
 
