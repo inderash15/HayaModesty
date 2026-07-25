@@ -3852,17 +3852,7 @@
 
             async function loginAdmin() {
                 const pw = document.getElementById('adminPasswordInput').value;
-                
-                // Static frontend fallback verification
-                if (pw === 'enginex@103') {
-                    const fallbackUser = { id: 'admin_root', name: 'Admin', email: 'admin@hayamodesty.com', role: 'admin' };
-                    localStorage.setItem('hm_token', 'fallback_admin_token_jwt_signature');
-                    saveUser(fallbackUser);
-                    closeAdmin('adminLoginOverlay');
-                    showAdminDashboard();
-                    showToast('Admin logged in successfully!', 'success');
-                    return;
-                }
+                let useFallback = false;
 
                 try {
                     const res = await fetch('/api/admin/login', {
@@ -3870,20 +3860,42 @@
                         headers: { 'Content-Type': 'application/json' },
                         body: JSON.stringify({ email: 'admin@hayamodesty.com', password: pw })
                     });
-                    const data = await res.json();
-                    if (res.ok && data.user.role === 'admin') {
-                        localStorage.setItem('hm_token', data.token);
-                        saveUser(data.user);
+                    
+                    if (res.status === 404 || res.status === 500) {
+                        useFallback = true;
+                    } else {
+                        const data = await res.json();
+                        if (res.ok && data.user.role === 'admin') {
+                            localStorage.setItem('hm_token', data.token);
+                            saveUser(data.user);
+                            closeAdmin('adminLoginOverlay');
+                            showAdminDashboard();
+                            showToast('Admin logged in!', 'success');
+                        } else {
+                            document.getElementById('adminLoginError').style.display = 'block';
+                            document.getElementById('adminPasswordInput').value = '';
+                            document.getElementById('adminPasswordInput').focus();
+                        }
+                    }
+                } catch (e) {
+                    console.warn('API authentication failed, attempting local fallback:', e);
+                    useFallback = true;
+                }
+
+                if (useFallback) {
+                    if (pw === 'enginex@103') {
+                        const fallbackUser = { id: 'admin_root', name: 'Admin', email: 'admin@hayamodesty.com', role: 'admin' };
+                        // Generate a dummy JWT token signature that satisfies basic structure
+                        localStorage.setItem('hm_token', 'fallback_admin_token_jwt_signature');
+                        saveUser(fallbackUser);
                         closeAdmin('adminLoginOverlay');
                         showAdminDashboard();
-                        showToast('Admin logged in!', 'success');
+                        showToast('Admin logged in (Offline Fallback)!', 'success');
                     } else {
                         document.getElementById('adminLoginError').style.display = 'block';
                         document.getElementById('adminPasswordInput').value = '';
                         document.getElementById('adminPasswordInput').focus();
                     }
-                } catch (e) {
-                    showToast('Login error: ' + e.message, 'error');
                 }
             }
 
