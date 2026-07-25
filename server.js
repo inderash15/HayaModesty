@@ -6,11 +6,11 @@ const { URL } = require('url');
 // Load environment variables locally if .env file exists
 if (fs.existsSync(path.join(__dirname, '.env'))) {
     const dotenv = fs.readFileSync(path.join(__dirname, '.env'), 'utf8');
-    dotenv.split('\n').forEach(line => {
+    dotenv.split(/\r?\n/).forEach(line => {
         const parts = line.match(/^\s*([\w.-]+)\s*=\s*(.*)?\s*$/);
         if (parts) {
             const key = parts[1];
-            let value = parts[2] || '';
+            let value = (parts[2] || '').trim();
             if (value.startsWith('"') && value.endsWith('"')) {
                 value = value.substring(1, value.length - 1);
             }
